@@ -1,0 +1,19 @@
+# Mac stuff
+.DS_Store
+
+# RPM SOURCES
+*.tgz
+*.gz
+*.zip
+*.war
+*.bz2
+
+# RPMS
+BUILD
+BUILDROOT
+RPMS
+SRPMS
+*.rpm
+
+#Vagrant Dev Setup
+.vagrant
