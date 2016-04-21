@@ -1,0 +1,329 @@
+#!/bin/bash
+if [ "$EUID" -ne 0 ]
+  then echo "exchange-config requires root user access"
+  exit
+fi
+
+usage ()
+{
+  echo 'Usage:'
+  echo '        exchange-config database'
+  echo '        exchange-config selinux'
+  echo '        exchange-config updateip <public ip or domain>'
+  echo '        exchange-config updatelayers'
+  echo '        exchange-config rebuild_index'
+  echo '        exchange-config syncdb'
+  echo '        exchange-config collectstatic'
+  echo '        exchange-config changepassword <username>'
+  echo '        exchange-config createsuperuser'
+  echo '        exchange-config shell'
+  echo '        exchange-config dbshell'
+  echo '        exchange-config start_all'
+  echo '            restarts all exchange services'
+  echo '        exchange-config stop_all'
+  echo '            stops all exchange services'
+  echo '        exchange-config init <ip or domain>'
+  echo '            chains together database, django, updateip,'
+  echo '            collectstatic, syncdb, selinux, start_all,'
+  echo '            updatelayers, rebuildindex and createsuperuser'
+  exit
+}
+
+# global values
+OPTIONS="$#"
+ARG="$1"
+VAR="$2"
+CHAR="[:alnum:]"
+IS_REPLACE=0
+EXCHANGE_ETC=/etc/exchange
+GEOSERVER_DATA_DIR=/var/lib/geoserver_data
+CATALINA_ETC=/etc/tomcat8/Catalina
+PYTHON27=/var/lib/geonode/bin/python2.7
+MANAGE=/var/lib/geonode/exchange/manage.py
+
+database()
+{
+  if [ ! -d /var/lib/pgsql/9.5/data/base ]; then
+    version=`rpm -qa \*-release | grep -Ei "redhat|centos" | cut -d"-" -f3`
+    if [ $version == 7 ];then
+      /usr/pgsql-9.5/bin/postgresql95-setup initdb
+    else
+      service postgresql-9.5 initdb
+    fi
+
+    chkconfig postgresql-9.5 on
+    sed -i.exchange 's/peer$/trust/g' /var/lib/pgsql/9.5/data/pg_hba.conf
+    sed -i.exchange 's/ident$/md5/g' /var/lib/pgsql/9.5/data/pg_hba.conf
+    service postgresql-9.5 restart > /dev/null 2>&1
+  fi
+  PGUSER=$(psql -U postgres -c '\du' | cut -d \| -f 1 | grep -w exchange | wc -l)
+  psqlpass=$(cat /dev/urandom | tr -cd "$CHAR" | head -c ${1:-16})
+  if [ $PGUSER == 0 ]
+  then
+    sed -i "s@\(DATABASE_PASSWORD[  ]*=[  ]*\).*@\1\'$psqlpass'@g" $EXCHANGE_ETC/local_settings.py
+    psql -U postgres -c "CREATE USER exchange WITH PASSWORD '$psqlpass';"
+  else
+    sed -i "s@\(DATABASE_PASSWORD[  ]*=[  ]*\).*@\1\'$psqlpass'@g" $EXCHANGE_ETC/local_settings.py
+    psql -U postgres -c "UPDATE USER exchange WITH PASSWORD '$psqlpass';"
+  fi
+  EXCHANGE_DB=$(psql -U postgres -lqt | cut -d \| -f 1 | grep -w exchange | wc -l)
+  if [ $EXCHANGE_DB == 0 ]
+  then
+    psql -U postgres -c "CREATE DATABASE exchange OWNER exchange;"
+    if [ -f /var/lib/tomcat8/webapps/geoserver/WEB-INF/classes/org/geonode/security/geonode_authorize_layer.sql ]; then
+      psql -U exchange -d exchange -f /var/lib/tomcat8/webapps/geoserver/WEB-INF/classes/org/geonode/security/geonode_authorize_layer.sql
+    fi
+  else
+    echo "exchange database already created"
+  fi
+  EXCHANGE_DATA_DB=$(psql -U postgres -lqt | cut -d \| -f 1 | grep -w exchange_data | wc -l)
+  if [ $EXCHANGE_DATA_DB == 0 ]
+  then
+    psql -U postgres -c "CREATE DATABASE exchange_data OWNER exchange;"
+    psql -U postgres -d exchange_data -c 'CREATE EXTENSION postgis;'
+    psql -U postgres -d exchange_data -c 'GRANT ALL ON geometry_columns TO PUBLIC;'
+    psql -U postgres -d exchange_data -c 'GRANT ALL ON spatial_ref_sys TO PUBLIC;'
+  else
+    echo "exchange_data database already created"
+  fi
+}
+
+django()
+{
+  secretkey=$(cat /dev/urandom | tr -cd "$CHAR" | head -c ${1:-32})
+  sed -i "s@\(SECRET_KEY[  ]*=[  ]*\).*@\1\'$secretkey'@g" $EXCHANGE_ETC/local_settings.py
+}
+
+selinux()
+{
+  iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+  iptables -I INPUT -p tcp --dport 443 -j ACCEPT
+  service iptables save
+  setsebool -P httpd_can_network_connect=1 httpd_can_network_connect_db=1
+  service iptables restart > /dev/null 2>&1
+  service httpd restart > /dev/null 2>&1
+}
+
+syncdb()
+{
+  $PYTHON27 $MANAGE syncdb --noinput
+}
+
+collectstatic()
+{
+  $PYTHON27 $MANAGE collectstatic --noinput
+}
+
+changepassword()
+{
+  if [ $ARG == "init" ]
+  then
+    $PYTHON27 $MANAGE changepassword admin
+  else
+    USER="$VAR"
+    $PYTHON27 $MANAGE changepassword $USER
+  fi
+}
+
+createsuperuser()
+{
+  echo "Creating django/exchange superuser"
+  $PYTHON27 $MANAGE createsuperuser
+}
+
+createbaseusers(){
+  echo "from geonode.people.models import Profile; Profile.objects.create_superuser('admin', 'admin@exchange.com', 'changeme', first_name='Administrator', last_name='Exchange')" \
+       | $PYTHON27 $MANAGE shell
+  echo "from geonode.people.models import Profile; Profile.objects.create_user('demo', 'test@exchange.com', 'changeme', first_name='Demo', last_name='User')" \
+       | $PYTHON27 $MANAGE shell
+}
+
+updateip()
+{
+  NEWIP="$VAR"
+  sed -i "s@\(SITEURL[  ]*=[  ]*\).*@\1\'http://$NEWIP\/'@g" $EXCHANGE_ETC/local_settings.py
+  printing_config=$GEOSERVER_DATA_DIR/printing/config.yaml
+  if grep -qv "$NEWIP" "$printing_config"
+  then
+      sed -i "s#hosts:#hosts:\n  - !ipMatch\n    ip: $NEWIP#g" $printing_config
+  fi
+  sed -i "s/^\([  ]*ALLOWED_HOSTS[  ]*=\).*/\1 ['$NEWIP','localhost']/g" $EXCHANGE_ETC/local_settings.py
+}
+
+updatelayers()
+{
+  $PYTHON27 $MANAGE updatelayers --ignore-errors --remove-deleted --skip-unadvertised
+}
+
+rebuild_index()
+{
+  $PYTHON27 $MANAGE rebuild_index --noinput
+}
+
+shell()
+{
+  $PYTHON27 $MANAGE shell
+}
+
+dbshell()
+{
+  $PYTHON27 $MANAGE dbshell
+}
+
+start_all()
+{
+  chkconfig tomcat8 on
+  echo "Starting tomcat service"
+  service tomcat8 stop > /dev/null 2>&1
+  sleep 2
+  service tomcat8 start
+  chkconfig rabbitmq-server on
+  echo "Starting rabbitmq-server service"
+  service rabbitmq-server stop > /dev/null 2>&1
+  sleep 2
+  service rabbitmq-server start
+  chkconfig elasticsearch on
+  echo "Starting elasticsearch service"
+  service elasticsearch stop > /dev/null 2>&1
+  sleep 2
+  service elasticsearch start
+  chkconfig exchange on
+  echo "Starting exchange service"
+  service exchange stop > /dev/null 2>&1
+  sleep 2
+  service exchange start
+  chkconfig httpd on
+  echo "Starting httpd service"
+  service httpd stop > /dev/null 2>&1
+  sleep 2
+  service httpd start
+}
+
+stop_all()
+{
+  echo "Stopping tomcat service"
+  service tomcat8 stop
+  echo "Stopping rabbitmq-server service"
+  service rabbitmq-server stop
+  echo "Stopping elasticsearch service"
+  service elasticsearch stop
+  echo "Stopping exchange service"
+  service exchange stop
+  echo "Stopping httpd service"
+  service httpd stop
+}
+
+confirm_continue(){
+  if [ -f /etc/exchange/initialized.txt ]; then
+    echo "    exchange has already been initialized"
+    exit
+  fi
+  while true; do
+    read -p "=> Are you sure you want to continue? (y|n)  " yn
+    case $yn in
+      [Yy]* ) break;;
+      [Nn]* ) echo "    Aborted script.";exit;;
+      * ) echo "    Please answer y for yes or n for no.";;
+    esac
+  done
+}
+
+log_config(){
+  printf "exchange was initialized at %s\n" "$(date)" > /etc/exchange/initialized.txt
+}
+
+case "$1" in
+    init)
+        if [ $OPTIONS -eq 2 ];
+        then
+          confirm_continue
+          log_config
+          database
+          django
+          updateip
+          collectstatic
+          syncdb
+          selinux
+          start_all
+          echo "Waiting 90 seconds for services to start up"
+          sleep 90
+          createbaseusers
+          updatelayers
+          rebuild_index
+          changepassword
+        else
+          echo "Usage: exchange-config $1 <public domain or ip address>"
+        fi
+        RETVAL=$?
+        ;;
+    database)
+        database
+        RETVAL=$?
+        ;;
+    django)
+        django
+        RETVAL=$?
+        ;;
+    selinux)
+        selinux
+        RETVAL=$?
+        ;;
+    updateip)
+        if [ $OPTIONS -eq 2 ];
+        then
+          updateip
+          start_all
+        else
+          echo "Usage: exchange-config $1 <public domain or ip address>"
+        fi
+        RETVAL=$?
+        ;;
+    updatelayers)
+        updatelayers
+        RETVAL=$?
+        ;;
+    rebuild_index)
+        rebuild_index
+        RETVAL=$?
+        ;;
+    syncdb)
+        syncdb
+        RETVAL=$?
+        ;;
+    collectstatic)
+        collectstatic
+        RETVAL=$?
+        ;;
+    changepassword)
+        if [ $OPTIONS -eq 2 ];
+        then
+          changepassword
+        else
+          echo "Usage: exchange-config $1 <username>"
+        fi
+        RETVAL=$?
+        ;;
+    createsuperuser)
+        createsuperuser
+        RETVAL=$?
+        ;;
+    shell)
+        shell
+        RETVAL=$?
+        ;;
+    dbshell)
+        dbshell
+        RETVAL=$?
+        ;;
+    start_all)
+        start_all
+        RETVAL=$?
+        ;;
+    stop_all)
+        stop_all
+        RETVAL=$?
+        ;;
+    *)
+        usage
+        exit 1
+esac
