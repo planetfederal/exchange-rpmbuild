@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 
-pushd /etc/yum.repos.d
 # Need to change to a new exchange repo
-wget https://yum.boundlessps.com/geoshape.repo
-popd
+curl -o /etc/yum.repos.d/exchange.repo https://yum.boundlessps.com/geoshape.repo
 sudo yum -y update
 sudo yum -y install python27-devel \
                     python27-virtualenv \

@@ -1,7 +1,7 @@
 # Define Constants
 %define name exchange
 %define version 1.0.0
-%define release 0.1rc%{?dist}
+%define release rc1%{?dist}
 %define git_link https://%{git_user}:%{git_password}@github.com/boundlessgeo/exchange.git
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
@@ -101,6 +101,9 @@ pushd %{name}
 pip install -r requirements.txt
 popd
 
+# Make sure we don't package .git
+rm -rf $GEONODE_LIB/src/{geonode,django-maploom,django-geoexplorer}/.git
+
 # setup supervisord configuration
 SUPV_ETC=$RPM_BUILD_ROOT%{_sysconfdir}
 mkdir -p $SUPV_ETC
@@ -199,5 +202,7 @@ fi
 %doc ../SOURCES/license/GNU
 
 %changelog
+* Thu Apr 21 2016 amirahav <arahav@boundlessgeo.com> [1.0.0-rc1]
+- Remove .git directories
 * Tue Apr 19 2016 BerryDaniel <dberry@boundlessgeo.com> [1.0.0-0.1rc]
 - Initial RPM for Boundless Exchange
