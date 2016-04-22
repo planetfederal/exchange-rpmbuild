@@ -1,7 +1,7 @@
 # Define Constants
 %define name exchange
 %define version 1.0.0
-%define release rc1%{?dist}
+%define release 2%{?dist}
 %define git_link https://%{git_user}:%{git_password}@github.com/boundlessgeo/exchange.git
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
@@ -20,7 +20,6 @@ Source2:          %{name}.conf
 Source3:          proxy.conf
 Source4:          local_settings.py
 Source5:          %{name}-config
-Source6:          geoserver.xml
 Requires(pre):    /usr/sbin/useradd
 Requires(pre):    /usr/bin/getent
 Requires(pre):    bash
@@ -90,6 +89,8 @@ GEONODE_LIB=$RPM_BUILD_ROOT%{_localstatedir}/lib/geonode
 mkdir -p $GEONODE_LIB/django/{static,media/thumbs}
 pushd $GEONODE_LIB
 git clone %{git_link}
+# Make sure we don't package .git or dev directories
+rm -rf $GEONODE_LIB/%{name}/{.git,dev}
 
 # create virtualenv
 virtualenv .
@@ -144,9 +145,6 @@ USER_BIN=$RPM_BUILD_ROOT%{_prefix}/bin
 mkdir -p $USER_BIN
 install -m 755 %{SOURCE5} $USER_BIN/
 
-# GeoNode databaseSecurityClient
-install -m 755 %{SOURCE5} $EXCHANGE_CONF/geoserver.xml
-
 %pre
 getent group geoservice >/dev/null || groupadd -r geoservice
 usermod -a -G geoservice tomcat
@@ -182,7 +180,6 @@ fi
 %defattr(755,%{name},geoservice,755)
 %{_localstatedir}/lib/geonode
 %config(noreplace) %{_sysconfdir}/%{name}/local_settings.py
-%{_sysconfdir}/%{name}/geoserver.xml
 %defattr(775,%{name},geoservice,775)
 %dir %{_localstatedir}/lib/geonode/django/static
 %dir %{_localstatedir}/lib/geonode/django/media
@@ -202,6 +199,8 @@ fi
 %doc ../SOURCES/license/GNU
 
 %changelog
+* Fri Apr 22 2016 amirahav <arahav@boundlessgeo.com> [1.0.0-2]
+- Use databaseSecurityClient by default
 * Thu Apr 21 2016 amirahav <arahav@boundlessgeo.com> [1.0.0-rc1]
 - Remove .git directories
 * Tue Apr 19 2016 BerryDaniel <dberry@boundlessgeo.com> [1.0.0-0.1rc]

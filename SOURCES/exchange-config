@@ -86,6 +86,18 @@ database()
   else
     echo "exchange_data database already created"
   fi
+
+  if [ -f /usr/share/tomcat8/conf/Catalina/localhost/geoserver.xml ]; then
+    sed -i "s@password=.*@password=$psqlpass\"/>@" /usr/share/tomcat8/conf/Catalina/localhost/geoserver.xml
+  else
+    mkdir -p /usr/share/tomcat8/conf/Catalina/localhost
+    echo "<?xml version='1.0' encoding='utf-8'?>
+<Context path=\"/geoserver\"
+    antiResourceLocking=\"false\" >
+  <Parameter name=\"org.geonode.security.databaseSecurityClient.url\"
+    value=\"jdbc:postgresql://localhost:5432/exchange?user=exchange&amp;password=$psqlpass\"/>
+</Context>" > /usr/share/tomcat8/conf/Catalina/localhost/geoserver.xml
+  fi
 }
 
 django()
