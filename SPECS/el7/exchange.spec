@@ -16,8 +16,8 @@ License:          GPLv2
 Packager:         BerryDaniel <dberry@boundlessgeo.com>
 Source0:          supervisord.conf
 Source1:          %{name}.init
-Source2:          %{name}.conf
-Source3:          proxy.conf
+Source2:          %{name}-el7.conf
+Source3:          proxy-el7.conf
 Source4:          local_settings.py
 Source5:          %{name}-config
 Requires(pre):    /usr/sbin/useradd
