@@ -2,7 +2,7 @@
 %define name exchange
 %define version 1.0.0
 %define release 2%{?dist}
-%define git_link https://%{git_user}:%{git_password}@github.com/boundlessgeo/exchange.git
+%define git_link %{git_url}
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
 %define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
