@@ -8,7 +8,5 @@ vagrant ssh
 QA_RPATHS=$[ 0x0001|0x0010 ] rpmbuild --define '_topdir /vagrant' \
                                       --define 'git_user add_username' \
                                       --define 'git_password add_password' \
-                                      -bb /vagrant/SPECS/exchange.spec
-QA_RPATHS=$[ 0x0001|0x0010 ] rpmbuild --define '_topdir /vagrant' \
-                                      -bb /vagrant/SPECS/geonode-geoserver.spec
+                                      -bb /vagrant/SPECS/el6/exchange.spec
 ```
