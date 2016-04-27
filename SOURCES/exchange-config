@@ -26,7 +26,7 @@ usage ()
   echo '            chains together database, django, updateip,'
   echo '            collectstatic, syncdb, selinux, start_all,'
   echo '            updatelayers, rebuildindex and createsuperuser'
-  echo '        exchange-config changeskin BOUNDLESS|GEOINT'
+  echo '        exchange-config geoint_skin'
   exit
 }
 
@@ -144,13 +144,6 @@ createsuperuser()
   $PYTHON27 $MANAGE createsuperuser
 }
 
-createbaseusers(){
-  echo "from geonode.people.models import Profile; Profile.objects.create_superuser('admin', 'admin@exchange.com', 'changeme', first_name='Administrator', last_name='Exchange')" \
-       | $PYTHON27 $MANAGE shell
-  echo "from geonode.people.models import Profile; Profile.objects.create_user('demo', 'test@exchange.com', 'changeme', first_name='Demo', last_name='User')" \
-       | $PYTHON27 $MANAGE shell
-}
-
 updateip()
 {
   NEWIP="$VAR"
@@ -245,32 +238,8 @@ log_config(){
   printf "exchange was initialized at %s\n" "$(date)" > /etc/exchange/initialized.txt
 }
 
-change_skin(){
-    TEMPLATE="$VAR"
-    if [ $VAR == "GEOINT" ];
-    then
-        cp -f /var/lib/geonode/exchange/exchange/static/img/geoint-background.png \
-              /var/lib/geonode/exchange/exchange/static/img/background.png
-        cp -f /var/lib/geonode/exchange/exchange/static/img/geoint-icon.png \
-              /var/lib/geonode/exchange/exchange/static/img/icon.png
-        cp -f /var/lib/geonode/exchange/exchange/static/img/geoint-logo.png \
-              /var/lib/geonode/exchange/exchange/static/img/logo.png
-        sed -i 's/#29728C/#0F1A2C/g' /var/lib/geonode/exchange/exchange/static/css/site_base.css
-        sed -i 's/#FF6600/#37A6AD/g' /var/lib/geonode/exchange/exchange/static/css/site_base.css
-        sed -i 's@<span class="title">.*@<span class="title"> {% trans "Exchange" %} </span>@' \
-               /var/lib/geonode/exchange/exchange/templates/site_index.html
-    else
-        cp -f /var/lib/geonode/exchange/exchange/static/img/boundless-background.png \
-              /var/lib/geonode/exchange/exchange/static/img/background.png
-        cp -f /var/lib/geonode/exchange/exchange/static/img/boundless-icon.png \
-              /var/lib/geonode/exchange/exchange/static/img/icon.png
-        cp -f /var/lib/geonode/exchange/exchange/static/img/boundless-logo.png \
-              /var/lib/geonode/exchange/exchange/static/img/logo.png
-        sed -i 's/#0F1A2C/#29728C/g' /var/lib/geonode/exchange/exchange/static/css/site_base.css
-        sed -i 's/#37A6AD/#FF6600/g' /var/lib/geonode/exchange/exchange/static/css/site_base.css
-        sed -i 's@<span class="title">.*@<span class="title"> {% trans "Boundless Exchange" %} </span>@' \
-               /var/lib/geonode/exchange/exchange/templates/site_index.html
-    fi
+geoint_skin(){
+  $PYTHON27 $MANAGE loaddata geoint
 }
 
 case "$1" in
@@ -288,7 +257,6 @@ case "$1" in
           start_all
           echo "Waiting 90 seconds for services to start up"
           sleep 90
-          createbaseusers
           updatelayers
           rebuild_index
           changepassword
@@ -364,14 +332,9 @@ case "$1" in
         stop_all
         RETVAL=$?
         ;;
-    change_skin)
-        if [[ $OPTIONS -eq 2 && $VAR == "GEOINT" || $VAR == "BOUNDLESS" ]]
-        then
-            change_skin
-            collectstatic
-        else
-            echo "Usage: exchange-config $1 BOUNDLESS|GEOINT"
-        fi
+    geoint_skin)
+        geoint_skin
+        collectstatic
     RETVAL=$?
     ;;
     *)
