@@ -1,7 +1,7 @@
 # Define Constants
 %define name exchange
 %define version 1.0.0
-%define release 2%{?dist}
+%define release 3%{?dist}
 %define git_link %{git_url}
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
@@ -20,6 +20,8 @@ Source2:          %{name}-el7.conf
 Source3:          proxy-el7.conf
 Source4:          local_settings.py
 Source5:          %{name}-config
+Patch0:        base.html.patch
+Patch1:        models.py.patch
 Requires(pre):    /usr/sbin/useradd
 Requires(pre):    /usr/bin/getent
 Requires(pre):    bash
@@ -104,6 +106,12 @@ popd
 
 # Make sure we don't package .git
 rm -rf $GEONODE_LIB/src/{geonode,django-maploom,django-geoexplorer}/.git
+
+# Allow remote services and workaround for get_legend
+pushd $GEONODE_LIB/src/geonode
+patch -p0 < %{PATCH0}
+patch -p0 < %{PATCH1}
+popd
 
 # setup supervisord configuration
 SUPV_ETC=$RPM_BUILD_ROOT%{_sysconfdir}
@@ -199,6 +207,9 @@ fi
 %doc ../SOURCES/license/GNU
 
 %changelog
+* Sat Apr 30 2016 amirahav <arahav@boundlessgeo.com> [1.0.0-3]
+- Allow remote services for all users
+- workaround for get_legend errors
 * Fri Apr 22 2016 amirahav <arahav@boundlessgeo.com> [1.0.0-2]
 - Use databaseSecurityClient by default
 * Thu Apr 21 2016 amirahav <arahav@boundlessgeo.com> [1.0.0-rc1]
