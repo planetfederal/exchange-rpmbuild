@@ -1,7 +1,7 @@
 # Define Constants
 %define name exchange
 %define version 1.0.0
-%define release 3%{?dist}
+%define release 4%{?dist}
 %define git_link %{git_url}
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
@@ -20,8 +20,7 @@ Source2:          %{name}-el6.conf
 Source3:          proxy-el6.conf
 Source4:          local_settings.py
 Source5:          %{name}-config
-Patch0:        base.html.patch
-Patch1:        models.py.patch
+Patch0:        models.py.patch
 Requires(pre):    /usr/sbin/useradd
 Requires(pre):    /usr/bin/getent
 Requires(pre):    bash
@@ -110,7 +109,6 @@ rm -rf $GEONODE_LIB/src/{geonode,django-maploom,django-geoexplorer}/.git
 # Allow remote services and workaround for get_legend
 pushd $GEONODE_LIB/src/geonode
 patch -p0 < %{PATCH0}
-patch -p0 < %{PATCH1}
 popd
 
 # setup supervisord configuration
