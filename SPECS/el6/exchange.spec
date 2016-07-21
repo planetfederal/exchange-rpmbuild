@@ -176,7 +176,8 @@ if [ $1 -eq 0 ] ; then
   /sbin/service httpd stop > /dev/null 2>&1
   /sbin/chkconfig --del %{name}
   # backup geoserver data dir
-  mv /opt/boundless/%{name}/geoserver_data /tmp/geoserver_data
+  mkdir -p /opt/boundless/%{name}.rpmsave
+  mv /opt/boundless/%{name}/geoserver_data /opt/boundless/%{name}.rpmsave
   rm -fr /opt/boundless/%{name}
 fi
 
