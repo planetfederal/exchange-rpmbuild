@@ -88,15 +88,18 @@ Boundless Exchange is powered by GeoNode, GeoGig and Boundless Suite.
 
 %install
 # exchange module
-EXCHANGE_LIB=$RPM_BUILD_ROOT/opt/boundless/%{name}
-mkdir -p $EXCHANGE_LIB/.storage/{static,media/thumbs}
-pushd $EXCHANGE_LIB
+BOUNDLESS_LIB=$RPM_BUILD_ROOT/opt/boundless
+mkdir -p $BOUNDLESS_LIB
+pushd $BOUNDLESS_LIB
 git clone %{git_link}
+popd
+EXCHANGE_LIB=$BOUNDLESS_LIB/%{name}
+pushd $EXCHANGE_LIB
+mkdir -p $EXCHANGE_LIB/.storage/{static,media/thumbs}
 # Make sure we don't package .git or dev directories
-rm -rf $EXCHANGE_LIB/%{name}/{.git,dev}
+rm -rf $EXCHANGE_LIB/{.git,dev}
 
 # create virtualenv install python dependencies
-pushd %{name}
 virtualenv .venv
 export PATH=/usr/pgsql-9.5/bin:$PATH
 source .venv/bin/activate
@@ -147,6 +150,7 @@ install -m 755 %{SOURCE7} $EXCHANGE_LIB
 
 # profile.d script
 PROFILE_D=$RPM_BUILD_ROOT%{_sysconfdir}/profile.d
+mkdir -p $PROFILE_D
 install -m 755 %{SOURCE8} $PROFILE_D
 
 %pre
@@ -179,7 +183,7 @@ fi
 %postun
 
 %clean
-[ ${RPM_BUILD_ROOT} != "/" ] && rm -rf ${RPM_BUILD_ROOT}
+#[ ${RPM_BUILD_ROOT} != "/" ] && rm -rf ${RPM_BUILD_ROOT}
 
 %files
 %defattr(755,%{name},geoservice,755)
@@ -201,7 +205,7 @@ fi
 %defattr(-,root,root,-)
 %config %{_sysconfdir}/init.d/%{name}
 %{_prefix}/bin/%{name}-config
-%{_prefix}/profile.d/%{name}-settings.sh
+%{_sysconfdir}/profile.d/%{name}-settings.sh
 %doc ../SOURCES/license/GNU
 
 %changelog
