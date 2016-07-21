@@ -1,7 +1,7 @@
 # Define Constants
 %define name exchange
 %define version 1.0.0
-%define release 4%{?dist}
+%define release 5%{?dist}
 %define git_link %{git_url}
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
@@ -20,7 +20,9 @@ Source2:          %{name}-el6.conf
 Source3:          proxy-el6.conf
 Source4:          local_settings.py
 Source5:          %{name}-config
-Patch0:        models.py.patch
+Source6:          celery-worker.sh
+Source7:          waitress.sh
+Source8:          %{name}-settings.sh
 Requires(pre):    /usr/sbin/useradd
 Requires(pre):    /usr/bin/getent
 Requires(pre):    bash
@@ -86,30 +88,23 @@ Boundless Exchange is powered by GeoNode, GeoGig and Boundless Suite.
 
 %install
 # exchange module
-GEONODE_LIB=$RPM_BUILD_ROOT%{_localstatedir}/lib/geonode
-mkdir -p $GEONODE_LIB/django/{static,media/thumbs}
-pushd $GEONODE_LIB
+EXCHANGE_LIB=$RPM_BUILD_ROOT/opt/boundless/%{name}
+mkdir -p $EXCHANGE_LIB/.storage/{static,media/thumbs}
+pushd $EXCHANGE_LIB
 git clone %{git_link}
 # Make sure we don't package .git or dev directories
-rm -rf $GEONODE_LIB/%{name}/{.git,dev}
+rm -rf $EXCHANGE_LIB/%{name}/{.git,dev}
 
-# create virtualenv
-virtualenv .
-export PATH=/usr/pgsql-9.5/bin:$PATH
-source bin/activate
-
-# install python dependencies
+# create virtualenv install python dependencies
 pushd %{name}
+virtualenv .venv
+export PATH=/usr/pgsql-9.5/bin:$PATH
+source .venv/bin/activate
 pip install -r requirements.txt
 popd
 
 # Make sure we don't package .git
-rm -rf $GEONODE_LIB/src/{geonode,django-maploom,django-geoexplorer}/.git
-
-# Allow remote services and workaround for get_legend
-pushd $GEONODE_LIB/src/geonode
-patch -p0 < %{PATCH0}
-popd
+rm -rf $EXCHANGE_LIB/.venv/src/{geonode,django-maploom,django-geoexplorer}/.git
 
 # setup supervisord configuration
 SUPV_ETC=$RPM_BUILD_ROOT%{_sysconfdir}
@@ -129,9 +124,9 @@ mkdir -p $HTTPD_CONFD
 install -m 644 %{SOURCE2} $HTTPD_CONFD/%{name}.conf
 install -m 644 %{SOURCE3} $HTTPD_CONFD/proxy.conf
 
-# adjust virtualenv to /var/lib/geonode path
-VAR0=$RPM_BUILD_ROOT%{_localstatedir}/lib/geonode
-VAR1=%{_localstatedir}/lib/geonode
+# adjust virtualenv to /opt/boundless/exchange path
+VAR0=$RPM_BUILD_ROOT/opt/boundless/%{name}
+VAR1=/opt/boundless/%{name}
 find $VAR0 -type f -name '*pyc' -exec rm {} +
 grep -rl $VAR0 $VAR0 | xargs sed -i 's|'$VAR0'|'$VAR1'|g'
 
@@ -141,40 +136,44 @@ mkdir -p $EXCHANGE_CONF
 # local_settings.py
 install -m 775 %{SOURCE4} $EXCHANGE_CONF/local_settings.py
 
-# add robots.txt as a TemplateView in urls
-printf "User-agent: *\nDisallow: /geoserver/" > $GEONODE_LIB/%{name}/%{name}/templates/robots.txt
-sed -i "s|urlpatterns = patterns('',|urlpatterns = patterns('',\\n\
-url(r'^/robots\\\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),|" $RPM_BUILD_ROOT%{_localstatedir}/lib/geonode/%{name}/%{name}/urls.py
-
 # exchange-config command
 USER_BIN=$RPM_BUILD_ROOT%{_prefix}/bin
 mkdir -p $USER_BIN
 install -m 755 %{SOURCE5} $USER_BIN/
 
+# supervisor process scripts
+install -m 755 %{SOURCE6} $EXCHANGE_LIB
+install -m 755 %{SOURCE7} $EXCHANGE_LIB
+
+# profile.d script
+PROFILE_D=$RPM_BUILD_ROOT%{_sysconfdir}/profile.d
+install -m 755 %{SOURCE8} $PROFILE_D
+
 %pre
 getent group geoservice >/dev/null || groupadd -r geoservice
 usermod -a -G geoservice tomcat
 usermod -a -G geoservice apache
-getent passwd %{name} >/dev/null || useradd -r -d %{_localstatedir}/lib/geonode/exchange -g geoservice -s /bin/bash -c "Exchange Daemon User" %{name}
+getent passwd %{name} >/dev/null || useradd -r -d /opt/boundless/%{name} -g geoservice -s /bin/bash -c "Exchange Daemon User" %{name}
 
 %post
 if [ $1 -eq 1 ] ; then
-  ln -s %{_sysconfdir}/%{name}/local_settings.py %{_localstatedir}/lib/geonode/exchange/%{name}/local_settings.py
-  if [ -d /var/lib/geoserver_data ]; then
-    chgrp -hR geoservice /var/lib/geoserver_data
-    chmod -R 775 /var/lib/geoserver_data
+  ln -s %{_sysconfdir}/%{name}/local_settings.py /opt/boundless/%{name}/%{name}/local_settings.py
+  if [ -d /opt/boundless/%{name}/geoserver_data ]; then
+    chgrp -hR geoservice /opt/boundless/%{name}/geoserver_data
+    chmod -R 775 /opt/boundless/%{name}/geoserver_data
   fi
 fi
 
 %preun
-find %{_localstatedir}/lib/geonode -type f -name '*pyc' -exec rm {} +
+find /opt/boundless/%{name} -type f -name '*pyc' -exec rm {} +
 if [ $1 -eq 0 ] ; then
   /sbin/service tomcat8 stop > /dev/null 2>&1
   /sbin/service %{name} stop > /dev/null 2>&1
   /sbin/service httpd stop > /dev/null 2>&1
   /sbin/chkconfig --del %{name}
-      #remove soft link and virtual environment
-  rm -fr %{_localstatedir}/lib/geonode
+  # backup geoserver data dir
+  mv /opt/boundless/%{name}/geoserver_data /tmp/geoserver_data
+  rm -fr /opt/boundless/%{name}
 fi
 
 %postun
@@ -184,11 +183,11 @@ fi
 
 %files
 %defattr(755,%{name},geoservice,755)
-%{_localstatedir}/lib/geonode
+/opt/boundless/%{name}
 %config(noreplace) %{_sysconfdir}/%{name}/local_settings.py
 %defattr(775,%{name},geoservice,775)
-%dir %{_localstatedir}/lib/geonode/django/static
-%dir %{_localstatedir}/lib/geonode/django/media
+%dir /opt/boundless/%{name}/.storage/static
+%dir /opt/boundless/%{name}/.storage/media
 %defattr(744,%{name},geoservice,744)
 %dir %{_localstatedir}/log/celery
 %dir %{_localstatedir}/log/%{name}
@@ -202,9 +201,12 @@ fi
 %defattr(-,root,root,-)
 %config %{_sysconfdir}/init.d/%{name}
 %{_prefix}/bin/%{name}-config
+%{_prefix}/profile.d/%{name}-settings.sh
 %doc ../SOURCES/license/GNU
 
 %changelog
+* Thu Jul 21 2016 BerryDaniel <dberry@boundlessgeo.com> [1.0.0-5]
+- update for exchange rc5
 * Sat Apr 30 2016 amirahav <arahav@boundlessgeo.com> [1.0.0-3]
 - Allow remote services for all users
 - workaround for get_legend errors

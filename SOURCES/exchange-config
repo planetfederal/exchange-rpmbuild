@@ -37,10 +37,10 @@ VAR="$2"
 CHAR="[:alnum:]"
 IS_REPLACE=0
 EXCHANGE_ETC=/etc/exchange
-GEOSERVER_DATA_DIR=/var/lib/geoserver_data
+GEOSERVER_DATA_DIR=/opt/boundless/exchange/geoserver_data
 CATALINA_ETC=/etc/tomcat8/Catalina
-PYTHON27=/var/lib/geonode/bin/python2.7
-MANAGE=/var/lib/geonode/exchange/manage.py
+PYTHON27=/opt/boundless/exchange/.venv/bin/python2.7
+MANAGE=/opt/boundless/exchange/manage.py
 
 database()
 {
@@ -119,7 +119,10 @@ selinux()
 
 syncdb()
 {
-  $PYTHON27 $MANAGE syncdb --noinput
+  $PYTHON27 $MANAGE makemigrations
+  $PYTHON27 $MANAGE migrate account --noinput
+  $PYTHON27 $MANAGE migrate --noinput
+  $PYTHON27 $MANAGE loaddata initial_data
 }
 
 collectstatic()

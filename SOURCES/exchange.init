@@ -11,7 +11,7 @@
 
 set -a
 
-PREFIX=/var/lib/geonode
+PREFIX=/opt/boundless/exchange/.venv
 APP=exchange:*
 SUPERVISORD=$PREFIX/bin/supervisord
 SUPERVISORCTL=$PREFIX/bin/supervisorctl
