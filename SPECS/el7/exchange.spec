@@ -95,6 +95,8 @@ git clone %{git_link}
 popd
 EXCHANGE_LIB=$BOUNDLESS_LIB/%{name}
 pushd $EXCHANGE_LIB
+# add docs
+git submodule update --init
 mkdir -p $EXCHANGE_LIB/.storage/{static,media/thumbs}
 # Make sure we don't package .git or dev directories
 rm -rf $EXCHANGE_LIB/{.git,dev}
