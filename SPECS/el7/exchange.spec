@@ -1,7 +1,7 @@
 # Define Constants
 %define name exchange
 %define version 1.0.0
-%define release 6%{?dist}
+%define release 7%{?dist}
 %define git_link %{git_url}
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
@@ -163,7 +163,7 @@ getent passwd %{name} >/dev/null || useradd -r -d /opt/boundless/%{name} -g geos
 
 %post
 if [ $1 -eq 1 ] ; then
-  ln -s %{_sysconfdir}/%{name}/local_settings.py /opt/boundless/%{name}/%{name}/local_settings.py
+  ln -s %{_sysconfdir}/%{name}/local_settings.py /opt/boundless/%{name}/%{name}/settings/local_settings.py
   if [ -d /opt/boundless/%{name}/geoserver_data ]; then
     chgrp -hR geoservice /opt/boundless/%{name}/geoserver_data
     chmod -R 775 /opt/boundless/%{name}/geoserver_data
@@ -212,6 +212,10 @@ fi
 %doc ../SOURCES/license/GNU
 
 %changelog
+* Sat Jul 30 2016 amirahav <arahav@boundlessgeo.com> [1.0.0-7]
+- Update local_settings.py symlink
+* Thu Jul 28 2016 amirahav <arahav@boundlessgeo.com> [1.0.0-6]
+- update for exchange 1.0 Final
 * Thu Jul 21 2016 BerryDaniel <dberry@boundlessgeo.com> [1.0.0-5]
 - update for exchange rc5
 * Sat Apr 30 2016 amirahav <arahav@boundlessgeo.com> [1.0.0-3]
