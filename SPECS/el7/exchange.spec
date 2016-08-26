@@ -1,6 +1,6 @@
 # Define Constants
 %define name exchange
-%define version 1.0.0
+%define version 1.0.1
 %define release 8%{?dist}
 %define git_link %{git_url}
 %define _unpackaged_files_terminate_build 0
