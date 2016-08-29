@@ -1,7 +1,7 @@
 # Define Constants
 %define name exchange
 %define version 1.0.1
-%define release 8%{?dist}
+%define release 1%{?dist}
 %define git_link %{git_url}
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
@@ -212,6 +212,8 @@ fi
 %doc ../SOURCES/license/GNU
 
 %changelog
+* Mon Aug 29 2016 amirahav <arahav@boundlessgeo.com> [1.0.1-1]
+- Update to 1.0.1
 * Sat Jul 30 2016 amirahav <arahav@boundlessgeo.com> [1.0.0-7]
 - Update local_settings.py symlink
 * Thu Jul 28 2016 amirahav <arahav@boundlessgeo.com> [1.0.0-6]
