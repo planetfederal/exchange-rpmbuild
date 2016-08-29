@@ -37,6 +37,7 @@ BuildRequires:    expat-devel
 BuildRequires:    db4-devel
 BuildRequires:    gdbm-devel
 BuildRequires:    sqlite-devel
+BuildRequires:    libmemcached-devel
 BuildRequires:    readline-devel
 BuildRequires:    zlib-devel
 BuildRequires:    bzip2-devel
