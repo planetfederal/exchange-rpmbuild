@@ -53,7 +53,7 @@ BuildRequires:    freetype-devel
 BuildRequires:    lcms2-devel
 BuildRequires:    proj-devel
 BuildRequires:    geos-devel
-BuildRequires: 	  libmemcached-devel 
+BuildRequires:    libmemcached-devel 
 BuildRequires:    postgresql95-devel
 BuildRequires:    unzip
 BuildRequires:    git
@@ -74,7 +74,7 @@ Requires:         proj
 Requires:         geos
 Requires:         rabbitmq-server >= 3.5.6
 Requires:         erlang >= 18.1
-Requires:         mod_xsendfile
+Requires:         libmemcached
 AutoReqProv:      no
 
 %description

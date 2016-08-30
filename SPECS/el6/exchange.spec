@@ -74,7 +74,7 @@ Requires:         proj
 Requires:         geos
 Requires:         rabbitmq-server >= 3.5.6
 Requires:         erlang >= 18.1
-Requires:         mod_xsendfile
+Requires:         libmemcached
 AutoReqProv:      no
 
 %description
