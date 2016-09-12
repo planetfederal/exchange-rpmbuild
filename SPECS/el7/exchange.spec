@@ -1,7 +1,7 @@
 # Define Constants
 %define name exchange
-%define version 1.0.1
-%define release 2%{?dist}
+%define version 1.0.2
+%define release 1%{?dist}
 %define git_link %{git_url}
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
@@ -213,6 +213,8 @@ fi
 %doc ../SOURCES/license/GNU
 
 %changelog
+* Mon Sep 12 2016 mfairburn <mfairburn@boundlessgeo.com> [1.0.2]
+- Update to 1.0.2
 * Wed Aug 31 2016 amirahav <arahav@boundlessgeo.com> [1.0.1-2]
 - Update to 1.0.1-2
 * Mon Aug 29 2016 amirahav <arahav@boundlessgeo.com> [1.0.1-1]
