@@ -1,9 +1,9 @@
 # Define Constants
 %define name geonode-geoserver
 %define realname geoserver
-%define war_url https://s3.amazonaws.com/boundlessps-public/GVS/geoserver.war
-%define version 2.9
-%define release 4
+%define war_url https://yum-geonode.boundlessps.com/war/latest/geoserver.war
+%define version 2.9.2
+%define release 1
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
 %define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
@@ -78,13 +78,5 @@ fi
 /opt/geonode/geoserver_data
 
 %changelog
-* Sun Oct 30 2016 BerryDaniel <dberry@boundlessgeo.com> [2.9-4]
-- Download the war file directly in the spec file
-- Copy the data directory from the war file
-- remove exchange references from geonode-geoserver
-- data directory path is now /opt/geonode/geoserver_data
-* Wed Jul 20 2016 amirahav <arahav@boundlessgeo.com> [2.9-1]
-- Upgrade to Geoserver 2.9
-- Move Geoserver data directory to /opt/boundless/exchange/geoserver_data
-* Tue Apr 19 2016 BerryDaniel <dberry@boundlessgeo.com> [2.8-1]
-- Initial RPM for GeoNode GeoServer
+* Sun Nov 04 2016 BerryDaniel <dberry@boundlessgeo.com> [2.9.2-1]
+- Upgrade to Geoserver 2.9.2
