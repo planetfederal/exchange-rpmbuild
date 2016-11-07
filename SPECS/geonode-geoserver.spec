@@ -15,6 +15,8 @@ Group:         Development/Libraries
 License:       GPLv2
 BuildRequires: unzip
 BuildRequires: wget
+Requires:      geos
+Requires:      proj
 Requires:      tomcat8
 Conflicts:     geoserver
 Conflicts:     suite-geoserver
