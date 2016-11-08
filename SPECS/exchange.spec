@@ -123,6 +123,8 @@ source .venv/bin/activate
 pip install pip==8.1.2 --upgrade
 %endif
 pip install %{pip_link}
+# total hotfix, need to address upstream
+pip install celery==3.1.17 --upgrade
 popd
 
 # setup supervisord configuration
