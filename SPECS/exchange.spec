@@ -46,7 +46,6 @@ BuildRequires:    gcc
 BuildRequires:    gcc-c++
 BuildRequires:    make
 BuildRequires:    expat-devel
-BuildRequires:    db4-devel
 BuildRequires:    gdbm-devel
 BuildRequires:    sqlite-devel
 BuildRequires:    readline-devel
@@ -73,8 +72,8 @@ BuildRequires:    git
 Requires:         python27
 Requires:         python27-virtualenv
 %else
-BuildRequires:    python-devel
-BuildRequires:    python-virtualenv
+Requires:         python
+Requires:         python-virtualenv
 %endif
 Requires:         gdal >= 2.0.1
 Requires:         httpd
