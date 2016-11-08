@@ -13,6 +13,7 @@ Release:       %{release}
 Summary:       A version of GeoServer that is enhanced and designed for use with GeoNode.
 Group:         Development/Libraries
 License:       GPLv2
+AutoReqProv: no
 BuildRequires: unzip
 BuildRequires: wget
 Requires:      geos
@@ -80,5 +81,5 @@ fi
 /opt/geonode/geoserver_data
 
 %changelog
-* Sun Nov 04 2016 BerryDaniel <dberry@boundlessgeo.com> [2.9.2-1]
+* Tue Nov 05 2016 BerryDaniel <dberry@boundlessgeo.com> [2.9.2-1]
 - Upgrade to Geoserver 2.9.2
