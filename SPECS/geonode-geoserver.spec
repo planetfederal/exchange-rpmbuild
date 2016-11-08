@@ -3,7 +3,7 @@
 %define realname geoserver
 %define war_url https://yum-geonode.boundlessps.com/war/latest/geoserver.war
 %define version 2.9.2
-%define release 1
+%define release 2
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
 %define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
@@ -81,5 +81,5 @@ fi
 /opt/geonode/geoserver_data
 
 %changelog
-* Tue Nov 05 2016 BerryDaniel <dberry@boundlessgeo.com> [2.9.2-1]
+* Tue Nov 05 2016 BerryDaniel <dberry@boundlessgeo.com> [2.9.2-2]
 - Upgrade to Geoserver 2.9.2
