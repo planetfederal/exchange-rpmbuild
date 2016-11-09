@@ -1,7 +1,7 @@
 # Define Constants
 %define name exchange
-%define version 1.1.0
-%define release rc1%{?dist}
+%define version 1.1.0rc1
+%define release 1%{?dist}
 %define pip_link git+git://github.com/boundlessgeo/exchange@v1.1.0rc1#egg=geonode-exchange
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
@@ -223,7 +223,7 @@ fi
 %doc ../SOURCES/license/GPLv2
 
 %changelog
-* Fri Oct 28 2016 BerryDaniel <dberry@boundlessgeo.com> [1.1.0-rc1]
+* Fri Oct 28 2016 BerryDaniel <dberry@boundlessgeo.com> [1.1.0rc1-1]
 - update for exchange 1.1.0rc1
 - refactored rpmbuild to use exchange package instead of git repo
 * Mon Sep 12 2016 mfairburn <mfairburn@boundlessgeo.com> [1.0.2]
