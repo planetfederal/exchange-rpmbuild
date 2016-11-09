@@ -124,7 +124,7 @@ pip install pip==8.1.2 --upgrade
 %endif
 pip install %{pip_link}
 # total hotfix, need to address upstream
-pip install celery==3.1.17 --upgrade
+pip install celery<4.0a0 --upgrade
 popd
 
 # setup supervisord configuration
