@@ -3,7 +3,7 @@
 %define realname geoserver
 %define war_url https://yum-geonode.boundlessps.com/war/latest/geoserver.war
 %define version 2.9.2
-%define release 2
+%define release 3
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
 %define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
@@ -54,7 +54,7 @@ install -m 644 %{SOURCE1} $DATA/geogig/.geogigconfig
 if [ $1 -eq 1 ] ; then
   # add Java specific options
   echo '# Next line added for geonode service' >> %{_sysconfdir}/sysconfig/tomcat8
-  echo 'JAVA_OPTS="-Djava.awt.headless=true -Xms256m -Xmx1536m -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:SoftRefLRUPolicyMSPerMB=36000 -Duser.home=/opt/boundless/exchange/geoserver_data/geogig"' >> %{_sysconfdir}/sysconfig/tomcat8
+  echo 'JAVA_OPTS="-Djava.awt.headless=true -Xms256m -Xmx1536m -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:SoftRefLRUPolicyMSPerMB=36000 -Duser.home=/opt/geonode/geoserver_data/geogig"' >> %{_sysconfdir}/sysconfig/tomcat8
 fi
 
 %preun
@@ -81,5 +81,7 @@ fi
 /opt/geonode/geoserver_data
 
 %changelog
+* Wed Nov 06 2016 BerryDaniel <dberry@boundlessgeo.com> [2.9.2-3]
+- Upated JAVA_OPTS for user.home
 * Tue Nov 05 2016 BerryDaniel <dberry@boundlessgeo.com> [2.9.2-2]
 - Upgrade to Geoserver 2.9.2
