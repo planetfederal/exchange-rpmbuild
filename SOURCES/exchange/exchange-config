@@ -4,6 +4,8 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+version=`rpm -qa \*-release | grep -Ei "redhat|centos" | cut -d"-" -f3`
+
 usage ()
 {
   echo 'Usage:'
@@ -25,7 +27,6 @@ MANAGE=/opt/boundless/exchange/manage.py
 database()
 {
   if [ ! -d /var/lib/pgsql/9.5/data/base ]; then
-    version=`rpm -qa \*-release | grep -Ei "redhat|centos" | cut -d"-" -f3`
     if [ $version == 7 ];then
       /usr/pgsql-9.5/bin/postgresql95-setup initdb
     else
@@ -85,12 +86,22 @@ django()
 # configure exchange with selinux
 selinux()
 {
-  iptables -I INPUT -p tcp --dport 80 -j ACCEPT
-  iptables -I INPUT -p tcp --dport 443 -j ACCEPT
-  service iptables save
-  setsebool -P httpd_can_network_connect=1 httpd_can_network_connect_db=1
-  service iptables restart > /dev/null 2>&1
-  service httpd restart > /dev/null 2>&1
+  if [ $version == 7 ];then
+    systemctl enable firewalld
+    systemctl restart firewalld
+    firewall-cmd --zone=public --add-port=80/tcp --permanent
+    firewall-cmd --zone=public --add-port=443/tcp --permanent
+    setsebool -P httpd_can_network_connect=1 httpd_can_network_connect_db=1
+    firewall-cmd --reload
+    systemctl restart httpd
+  else
+    iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+    iptables -I INPUT -p tcp --dport 443 -j ACCEPT
+    service iptables save
+    setsebool -P httpd_can_network_connect=1 httpd_can_network_connect_db=1
+    service iptables restart > /dev/null 2>&1
+    service httpd restart > /dev/null 2>&1
+  fi
 }
 
 confirm_continue(){

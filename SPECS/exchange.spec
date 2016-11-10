@@ -1,7 +1,7 @@
 # Define Constants
 %define name exchange
 %define version 1.1.0rc1
-%define release 1%{?dist}
+%define release 2%{?dist}
 %define pip_link git+git://github.com/boundlessgeo/exchange@v1.1.0rc1#egg=geonode-exchange
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
@@ -223,6 +223,8 @@ fi
 %doc ../SOURCES/license/GPLv2
 
 %changelog
+* Thu Nov 10 2016 BerryDaniel <dberry@boundlessgeo.com> [1.1.0rc1-2]
+- adjusted the exchange-config to support el7 firewalld
 * Fri Oct 28 2016 BerryDaniel <dberry@boundlessgeo.com> [1.1.0rc1-1]
 - update for exchange 1.1.0rc1
 - refactored rpmbuild to use exchange package instead of git repo
