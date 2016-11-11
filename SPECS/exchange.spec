@@ -1,8 +1,24 @@
 # Define Constants
 %define name exchange
-%define version 1.1.0rc1
-%define release 2%{?dist}
-%define pip_link git+git://github.com/boundlessgeo/exchange@v1.1.0rc1#egg=geonode-exchange
+%define _version 1.1.0rc1
+%define _release 2%{?dist}
+%define _pip_link git+git://github.com/boundlessgeo/exchange@v1.1.0rc1#egg=geonode-exchange
+
+%if %{?ver:1}%{!?ver:0}
+%define version %{ver}
+%else
+%define version %{_version}
+%endif
+%if %{?rel:1}%{!?rel:0}
+%define release %{rel}
+%else
+%define release %{_release}
+%endif
+%if %{?pip:1}%{!?pip:0}
+%define pip_link %{pip}
+%else
+%define pip_link %{_pip_link}
+%endif
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
 %define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
