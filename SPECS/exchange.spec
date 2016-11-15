@@ -135,14 +135,13 @@ virtualenv .venv
 %endif
 export PATH=/usr/pgsql-9.5/bin:$PATH
 source .venv/bin/activate
-head -n1 .venv/bin/pip
-.venv/bin/pip --version
+python -m pip --version
 %if %{?rhel} > 6
-pip install pip==8.1.2 --upgrade
+python -m pip install pip==8.1.2 --upgrade
 %endif
-pip install %{pip_link}
+python -m pip install %{pip_link}
 # total hotfix, need to address upstream
-pip install celery==3.1.18 --upgrade
+python -m pip install celery==3.1.18 --upgrade
 popd
 
 # setup supervisord configuration
