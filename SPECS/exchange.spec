@@ -135,7 +135,6 @@ virtualenv .venv
 %endif
 export PATH=/usr/pgsql-9.5/bin:$PATH
 source .venv/bin/activate
-pip --version
 .venv/bin/pip --version
 %if %{?rhel} > 6
 pip install pip==8.1.2 --upgrade
