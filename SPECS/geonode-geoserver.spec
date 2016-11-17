@@ -3,7 +3,7 @@
 %define realname geoserver
 %define war_url https://yum-geonode.boundlessps.com/war/latest/geoserver.war
 %define version 2.9.2
-%define release 3
+%define release 4
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
 %define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
@@ -81,6 +81,8 @@ fi
 /opt/geonode/geoserver_data
 
 %changelog
+* Thu Nov 17 2016 BerryDaniel <dberry@boundlessgeo.com> [2.9.2-4]
+- geogig updates (QGIS support)
 * Wed Nov 06 2016 BerryDaniel <dberry@boundlessgeo.com> [2.9.2-3]
 - Upated JAVA_OPTS for user.home
 * Tue Nov 05 2016 BerryDaniel <dberry@boundlessgeo.com> [2.9.2-2]
