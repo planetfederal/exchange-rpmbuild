@@ -2,7 +2,7 @@
 
 set -e
 
-export PATH='/usr/pgsql-9.5/bin':$PATH
+export PATH='/usr/pgsql-9.6/bin':$PATH
 export SITE_URL='http://localhost/'
 export ES_URL='http://localhost:9200/'
 export LOCKDOWN_GEONODE=True

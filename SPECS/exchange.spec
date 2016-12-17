@@ -81,7 +81,7 @@ BuildRequires:    lcms2-devel
 BuildRequires:    proj-devel
 BuildRequires:    geos-devel
 BuildRequires:    libmemcached-devel
-BuildRequires:    postgresql95-devel
+BuildRequires:    postgresql96-devel
 BuildRequires:    unzip
 BuildRequires:    git
 %if %{?rhel} < 7
@@ -133,7 +133,7 @@ pushd $EXCHANGE_LIB
 %else
 virtualenv .venv
 %endif
-export PATH=/usr/pgsql-9.5/bin:$PATH
+export PATH=/usr/pgsql-9.6/bin:$PATH
 source .venv/bin/activate
 python -m pip --version
 %if %{?rhel} > 6

@@ -26,16 +26,16 @@ MANAGE=/opt/boundless/exchange/manage.py
 # configure local postgresql instance
 database()
 {
-  if [ ! -d /var/lib/pgsql/9.5/data/base ]; then
+  if [ ! -d /var/lib/pgsql/9.6/data/base ]; then
     if [ $version == 7 ];then
-      /usr/pgsql-9.5/bin/postgresql95-setup initdb
+      /usr/pgsql-9.6/bin/postgresql95-setup initdb
     else
-      service postgresql-9.5 initdb
+      service postgresql-9.6 initdb
     fi
-    chkconfig postgresql-9.5 on
-    sed -i.exchange 's/peer$/trust/g' /var/lib/pgsql/9.5/data/pg_hba.conf
-    sed -i.exchange 's/ident$/md5/g' /var/lib/pgsql/9.5/data/pg_hba.conf
-    service postgresql-9.5 restart > /dev/null 2>&1
+    chkconfig postgresql-9.6 on
+    sed -i.exchange 's/peer$/trust/g' /var/lib/pgsql/9.6/data/pg_hba.conf
+    sed -i.exchange 's/ident$/md5/g' /var/lib/pgsql/9.6/data/pg_hba.conf
+    service postgresql-9.6 restart > /dev/null 2>&1
   fi
   PGUSER=$(psql -U postgres -c '\du' | cut -d \| -f 1 | grep -w exchange | wc -l)
   if [ $PGUSER == 0 ]
