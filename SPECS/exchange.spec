@@ -2,7 +2,7 @@
 %define name exchange
 %define _version 1.1.0rc1
 %define _release 2%{?dist}
-%define _pip_link git+git://github.com/boundlessgeo/exchange@v1.1.0rc1#egg=geonode-exchange
+%define _req_link https://github.com/boundlessgeo/exchange/blob/master/requirements.txt
 
 %if %{?ver:1}%{!?ver:0}
 %define version %{ver}
@@ -14,10 +14,10 @@
 %else
 %define release %{_release}
 %endif
-%if %{?pip:1}%{!?pip:0}
-%define pip_link %{pip}
+%if %{?req:1}%{!?req:0}
+%define req_link %{req}
 %else
-%define pip_link %{_pip_link}
+%define req_link %{_req_link}
 %endif
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
@@ -139,7 +139,7 @@ python -m pip --version
 %if %{?rhel} > 6
 python -m pip install pip==8.1.2 --upgrade
 %endif
-python -m pip install %{pip_link}
+python -m pip install -r %{req_link}
 # total hotfix, need to address upstream
 python -m pip install celery==3.1.18 --upgrade
 popd
