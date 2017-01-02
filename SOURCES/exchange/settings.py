@@ -30,16 +30,9 @@ WSGI_APPLICATION = "exchange.wsgi.application"
 ROOT_URLCONF = 'exchange.urls'
 
 LOCAL_ROOT = os.path.abspath(os.path.dirname(__file__))
-PROJECT_ROOT = os.path.join(LOCAL_ROOT, os.pardir)
 
 # static files storage
 STATICFILES_DIRS.append(os.path.join(LOCAL_ROOT, "static"),)  # noqa
-STATIC_ROOT = os.path.join(PROJECT_ROOT, '.storage/static')
-STATIC_URL = '/static/'
-
-# media file storage
-MEDIA_ROOT = os.path.join(PROJECT_ROOT, '.storage/media')
-MEDIA_URL = '/uploaded/'
 
 # installed applications
 INSTALLED_APPS = (
