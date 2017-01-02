@@ -2,23 +2,26 @@
 %define name exchange
 %define _version 1.1.0rc1
 %define _release 2%{?dist}
-%define _req_link https://github.com/boundlessgeo/exchange/blob/master/requirements.txt
+%define _branch master
 
-%if %{?ver:1}%{!?ver:0}
+%if %{?ver:1}0
 %define version %{ver}
 %else
 %define version %{_version}
 %endif
-%if %{?rel:1}%{!?rel:0}
+
+%if %{?rel:1}0
 %define release %{rel}
 %else
 %define release %{_release}
 %endif
-%if %{?req:1}%{!?req:0}
-%define req_link %{req}
+
+%if %{?commit:1}0
+%define branch %{commit}
 %else
-%define req_link %{_req_link}
+%define branch %{_branch}
 %endif
+
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
 %define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
@@ -32,13 +35,10 @@ License:          GPLv2
 Packager:         BerryDaniel <dberry@boundlessgeo.com>
 Source0:          supervisord.conf
 Source1:          %{name}.init
-%if %{?rhel} < 7
-Source2:          %{name}-el6.conf
-Source3:          proxy-el6.conf
-%else
-Source2:          %{name}-el7.conf
-Source3:          proxy-el7.conf
-%endif
+%{?el6:Source2: %{name}-el6.conf}
+%{?el6:Source3: proxy-el6.conf}
+%{?el7:Source2: %{name}-el7.conf}
+%{?el7:Source3: proxy-el7.conf}
 Source4:          settings.py
 Source5:          %{name}-config
 Source6:          celery-worker.sh
@@ -51,13 +51,10 @@ Requires(pre):    /usr/bin/getent
 Requires(pre):    bash
 Requires(postun): /usr/sbin/userdel
 Requires(postun): bash
-%if %{?rhel} < 7
-BuildRequires:    python27-devel
-BuildRequires:    python27-virtualenv
-%else
-BuildRequires:    python-devel
-BuildRequires:    python-virtualenv
-%endif
+%{?el6:BuildRequires: python27-devel}
+%{?el6:BuildRequires: python27-virtualenv}
+%{?el7:BuildRequires: python-devel}
+%{?el7:BuildRequires: python-virtualenv}
 BuildRequires:    gcc
 BuildRequires:    gcc-c++
 BuildRequires:    make
@@ -84,13 +81,10 @@ BuildRequires:    libmemcached-devel
 BuildRequires:    postgresql96-devel
 BuildRequires:    unzip
 BuildRequires:    git
-%if %{?rhel} < 7
-Requires:         python27
-Requires:         python27-virtualenv
-%else
-Requires:         python
-Requires:         python-virtualenv
-%endif
+%{?el6:Requires: python27}
+%{?el6:Requires: python27-virtualenv}
+%{?el7:Requires: python}
+%{?el7:Requires: python-virtualenv}
 Requires:         gdal >= 2.0.1
 Requires:         httpd
 Requires:         mod_ssl
@@ -128,20 +122,27 @@ touch $EXCHANGE_LIB/bex/__init__.py
 
 # create virtualenv install geonode-exchange and python dependencies
 pushd $EXCHANGE_LIB
+
 %if %{?rhel} < 7
 /usr/local/bin/virtualenv .venv
 %else
 virtualenv .venv
 %endif
+
 export PATH=/usr/pgsql-9.6/bin:$PATH
 source .venv/bin/activate
 python -m pip --version
+
 %if %{?rhel} > 6
 python -m pip install pip==8.1.2 --upgrade
 %endif
-python -m pip install -r %{req_link}
+
+curl -O https://raw.githubusercontent.com/boundlessgeo/exchange/%{branch}/requirements/prod.txt
+curl -O https://raw.githubusercontent.com/boundlessgeo/exchange/%{branch}/requirements/common.txt
+python -m pip install -r prod.txt
 # total hotfix, need to address upstream
 python -m pip install celery==3.1.18 --upgrade
+rm -f {prod.txt,common.txt}
 popd
 
 # setup supervisord configuration
@@ -165,7 +166,7 @@ install -m 644 %{SOURCE3} $HTTPD_CONFD/proxy.conf
 # adjust virtualenv to /opt/boundless/exchange path
 VAR0=$RPM_BUILD_ROOT/opt/boundless/%{name}
 VAR1=/opt/boundless/%{name}
-find $VAR0 -type f -name '*pyc' -exec rm {} +
+find $VAR0 -type f -name '*pyc' -exec rm -f {} +
 grep -rl $VAR0 $VAR0 | xargs sed -i 's|'$VAR0'|'$VAR1'|g'
 
 # exchange-config command
@@ -198,12 +199,6 @@ usermod -a -G geoservice apache
 getent passwd %{name} >/dev/null || useradd -r -d /opt/boundless/%{name} -g geoservice -s /bin/bash -c "Exchange Daemon User" %{name}
 
 %post
-if [ $1 -eq 1 ] ; then
-  if [ -d /opt/geonode/geoserver_data ]; then
-    chgrp -hR geoservice /opt/geonode/geoserver_data
-    chmod -R 775 /opt/geonode/geoserver_data
-  fi
-fi
 
 %preun
 find /opt/boundless/%{name} -type f -name '*pyc' -exec rm {} +
@@ -220,20 +215,23 @@ fi
 [ ${RPM_BUILD_ROOT} != "/" ] && rm -rf ${RPM_BUILD_ROOT}
 
 %files
-%defattr(755,%{name},geoservice,755)
+%defattr(644,%{name},geoservice,755)
 /opt/boundless/%{name}
-%defattr(775,%{name},geoservice,775)
+%defattr(755,%{name},geoservice,755)
+/opt/boundless/%{name}/.venv/bin
+/opt/boundless/%{name}/*.sh
+/opt/boundless/%{name}/*.py
+%defattr(644,%{name},geoservice,755)
 %dir /opt/boundless/%{name}/.storage/static
 %dir /opt/boundless/%{name}/.storage/media
-%defattr(744,%{name},geoservice,744)
+%defattr(644,%{name},geoservice,755)
 %dir %{_localstatedir}/log/celery
 %dir %{_localstatedir}/log/%{name}
-%defattr(644,apache,apache,644)
+%defattr(644,apache,apache,755)
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/%{name}.conf
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/proxy.conf
 %defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/supervisord.conf
-%defattr(-,root,root,-)
 %config %{_sysconfdir}/init.d/%{name}
 %{_prefix}/bin/%{name}-config
 %{_sysconfdir}/profile.d/%{name}-settings.sh
