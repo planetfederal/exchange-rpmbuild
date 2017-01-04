@@ -137,12 +137,11 @@ python -m pip --version
 python -m pip install pip==8.1.2 --upgrade
 %endif
 
-curl -O https://raw.githubusercontent.com/boundlessgeo/exchange/%{branch}/requirements/prod.txt
-curl -O https://raw.githubusercontent.com/boundlessgeo/exchange/%{branch}/requirements/common.txt
-python -m pip install -r prod.txt
-# total hotfix, need to address upstream
-python -m pip install celery==3.1.18 --upgrade
-rm -f {prod.txt,common.txt}
+# Install requiremtns from specifc commit
+python -m pip install -r https://raw.githubusercontent.com/boundlessgeo/exchange/%{branch}/requirements.txt
+# Install requiremtns from specifc commit
+python -m pip install git+git://github.com/boundlessgeo/exchange.git@%{branch}#egg=geonode-exchange
+
 popd
 
 # setup supervisord configuration
