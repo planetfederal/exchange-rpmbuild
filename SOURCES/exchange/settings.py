@@ -21,25 +21,10 @@
 import os
 from exchange.settings import *  # noqa
 
-
-ALLOWED_HOSTS = ['*']
-DEBUG = False
-SECRET_KEY = 'exchange@q(6+mnr&=jb@z#)e_cix10b497vzaav61=de5@m3ewcj9%ctc'
-
 WSGI_APPLICATION = "exchange.wsgi.application"
 ROOT_URLCONF = 'exchange.urls'
 
 LOCAL_ROOT = os.path.abspath(os.path.dirname(__file__))
-PROJECT_ROOT = os.path.join(LOCAL_ROOT, os.pardir)
-
-# static files storage
-STATICFILES_DIRS.append(os.path.join(LOCAL_ROOT, "static"),)  # noqa
-STATIC_ROOT = os.path.join(PROJECT_ROOT, '.storage/static')
-STATIC_URL = '/static/'
-
-# media file storage
-MEDIA_ROOT = os.path.join(PROJECT_ROOT, '.storage/media')
-MEDIA_URL = '/uploaded/'
 
 # installed applications
 INSTALLED_APPS = (
