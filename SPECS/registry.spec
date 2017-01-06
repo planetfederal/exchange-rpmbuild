@@ -39,6 +39,7 @@ Source1:          %{name}.init
 %{?el7:Source2:   httpd-proxy-el7.conf}
 Source3:          %{name}-settings.sh
 Source4:          %{name}-createdb
+Source5:          %{name}.sh
 Requires(pre):    /usr/sbin/useradd
 Requires(pre):    /usr/bin/getent
 Requires(pre):    bash
@@ -107,7 +108,7 @@ python -m pip install pip==8.1.2 --upgrade
 python -m pip install -r https://raw.githubusercontent.com/boundlessgeo/registry/%{branch}/requirements.txt
 
 # Install additional dependencies
-python -m pip install psycopg2==2.6.1 supervisor==3.3.1
+python -m pip install psycopg2==2.6.1 supervisor==3.3.1 Pillow==3.4.2
 
 # Install registry.py and documentation.md from specific commit
 wget https://raw.githubusercontent.com/boundlessgeo/registry/%{branch}/registry.py
@@ -150,6 +151,9 @@ USER_BIN=$RPM_BUILD_ROOT%{_prefix}/bin
 mkdir -p $USER_BIN
 install -m 755 %{SOURCE4} $USER_BIN/
 
+# registry shell script that supervisor will run (loads profile.d settings)
+install -m 755 %{SOURCE5} $REGISTRY_ROOT/
+
 %pre
 getent group geoservice >/dev/null || groupadd -r geoservice
 getent passwd %{name} >/dev/null || useradd -r -d /opt/%{name} -g geoservice -s /bin/bash -c "Registry Daemon User" %{name}
@@ -169,12 +173,8 @@ fi
 [ ${RPM_BUILD_ROOT} != "/" ] && rm -rf ${RPM_BUILD_ROOT}
 
 %files
-%defattr(644,%{name},geoservice,755)
-/opt/%{name}
 %defattr(755,%{name},geoservice,755)
-/opt/%{name}/.venv/bin
-/opt/%{name}/*.py
-%defattr(644,%{name},geoservice,755)
+/opt/%{name}
 %defattr(644,%{name},geoservice,755)
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/%{name}-proxy.conf
 %defattr(-,root,root,-)
