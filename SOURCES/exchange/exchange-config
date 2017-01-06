@@ -1,0 +1,137 @@
+#!/bin/bash
+if [ "$EUID" -ne 0 ]
+  then echo "exchange-config requires root user access"
+  exit
+fi
+
+version=`rpm -qa \*-release | grep -Ei "redhat|centos" | cut -d"-" -f3`
+
+usage ()
+{
+  echo 'Usage:'
+  echo '        exchange-config database'
+  echo '            configures local postgresql instance'
+  echo '        exchange-config django'
+  echo '            configures local django instance'
+  echo '        exchange-config selinux'
+  echo '            configures local selinux instance'
+  exit
+}
+
+# global values
+psqlpass=boundless
+PYTHON27=/opt/boundless/exchange/.venv/bin/python2.7
+MANAGE=/opt/boundless/exchange/manage.py
+
+# configure local postgresql instance
+database()
+{
+  if [ ! -d /var/lib/pgsql/9.6/data/base ]; then
+    if [ $version == 7 ];then
+      /usr/pgsql-9.6/bin/postgresql95-setup initdb
+    else
+      service postgresql-9.6 initdb
+    fi
+    chkconfig postgresql-9.6 on
+    sed -i.exchange 's/peer$/trust/g' /var/lib/pgsql/9.6/data/pg_hba.conf
+    sed -i.exchange 's/ident$/md5/g' /var/lib/pgsql/9.6/data/pg_hba.conf
+    service postgresql-9.6 restart > /dev/null 2>&1
+  fi
+  PGUSER=$(psql -U postgres -c '\du' | cut -d \| -f 1 | grep -w exchange | wc -l)
+  if [ $PGUSER == 0 ]
+  then
+    psql -U postgres -c "CREATE USER exchange WITH PASSWORD '$psqlpass';"
+  else
+    psql -U postgres -c "ALTER USER exchange WITH PASSWORD '$psqlpass';"
+  fi
+  EXCHANGE_DB=$(psql -U postgres -lqt | cut -d \| -f 1 | grep -w exchange | wc -l)
+  if [ $EXCHANGE_DB == 0 ]
+  then
+    psql -U postgres -c "CREATE DATABASE exchange OWNER exchange;"
+    if [ -f /var/lib/tomcat8/webapps/geoserver/WEB-INF/classes/org/geonode/security/geonode_authorize_layer.sql ]; then
+      psql -U exchange -d exchange -f /var/lib/tomcat8/webapps/geoserver/WEB-INF/classes/org/geonode/security/geonode_authorize_layer.sql
+    fi
+  else
+    echo "exchange database already created"
+  fi
+  EXCHANGE_DATA_DB=$(psql -U postgres -lqt | cut -d \| -f 1 | grep -w exchange_data | wc -l)
+  if [ $EXCHANGE_DATA_DB == 0 ]
+  then
+    psql -U postgres -c "CREATE DATABASE exchange_data OWNER exchange;"
+    psql -U postgres -d exchange_data -c 'CREATE EXTENSION postgis;'
+    psql -U postgres -d exchange_data -c 'GRANT ALL ON geometry_columns TO PUBLIC;'
+    psql -U postgres -d exchange_data -c 'GRANT ALL ON spatial_ref_sys TO PUBLIC;'
+  else
+    echo "exchange_data database already created"
+  fi
+}
+
+# configure django instance
+django()
+{
+  source /etc/profile.d/exchange-settings.sh
+  secretkey=$(cat /dev/urandom | tr -cd "[:alnum:]" | head -c ${1:-32})
+  sed -i "s@\(SECRET_KEY[  ]*=[  ]*\).*@\1\'$secretkey'@g" /opt/boundless/exchange/bex/settings.py
+  $PYTHON27 $MANAGE makemigrations
+  $PYTHON27 $MANAGE migrate account --noinput
+  $PYTHON27 $MANAGE migrate --noinput
+  $PYTHON27 $MANAGE loaddata initial
+  $PYTHON27 $MANAGE loaddata base_resources
+  $PYTHON27 $MANAGE migrate account --noinput
+  $PYTHON27 $MANAGE collectstatic --noinput
+  chmod 755 -R /opt/boundless/exchange/.storage
+  chown exchange:geoservice -R /opt/boundless/exchange/.storage
+}
+
+# configure exchange with selinux
+selinux()
+{
+  if [ $version == 7 ];then
+    systemctl enable firewalld
+    systemctl restart firewalld
+    firewall-cmd --zone=public --add-port=80/tcp --permanent
+    firewall-cmd --zone=public --add-port=443/tcp --permanent
+    setsebool -P httpd_can_network_connect=1 httpd_can_network_connect_db=1
+    firewall-cmd --reload
+    systemctl restart httpd
+  else
+    iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+    iptables -I INPUT -p tcp --dport 443 -j ACCEPT
+    service iptables save
+    setsebool -P httpd_can_network_connect=1 httpd_can_network_connect_db=1
+    service iptables restart > /dev/null 2>&1
+    service httpd restart > /dev/null 2>&1
+  fi
+}
+
+confirm_continue(){
+  while true; do
+    read -p "=> Are you sure you want to continue? (y|n)  " yn
+    case $yn in
+      [Yy]* ) break;;
+      [Nn]* ) echo "    Aborted script.";exit;;
+      * ) echo "    Please answer y for yes or n for no.";;
+    esac
+  done
+}
+
+case "$1" in
+    database)
+        confirm_continue
+        database
+        RETVAL=$?
+        ;;
+    django)
+        confirm_continue
+        django
+        RETVAL=$?
+        ;;
+    selinux)
+        confirm_continue
+        selinux
+        RETVAL=$?
+        ;;
+    *)
+        usage
+        exit 1
+esac

@@ -1,8 +1,27 @@
 # Define Constants
 %define name exchange
-%define version 1.0.2
-%define release 1%{?dist}
-%define git_link %{git_url}
+%define _version 1.1.0rc1
+%define _release 2%{?dist}
+%define _branch master
+
+%if %{?ver:1}0
+%define version %{ver}
+%else
+%define version %{_version}
+%endif
+
+%if %{?rel:1}0
+%define release %{rel}
+%else
+%define release %{_release}
+%endif
+
+%if %{?commit:1}0
+%define branch %{commit}
+%else
+%define branch %{_branch}
+%endif
+
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
 %define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
@@ -16,28 +35,32 @@ License:          GPLv2
 Packager:         BerryDaniel <dberry@boundlessgeo.com>
 Source0:          supervisord.conf
 Source1:          %{name}.init
-Source2:          %{name}-el6.conf
-Source3:          proxy-el6.conf
-Source4:          local_settings.py
+%{?el6:Source2: %{name}-el6.conf}
+%{?el6:Source3: proxy-el6.conf}
+%{?el7:Source2: %{name}-el7.conf}
+%{?el7:Source3: proxy-el7.conf}
+Source4:          settings.py
 Source5:          %{name}-config
 Source6:          celery-worker.sh
 Source7:          waitress.sh
 Source8:          %{name}-settings.sh
+Source9:          manage.py
+Source10:         wsgi.py
 Requires(pre):    /usr/sbin/useradd
 Requires(pre):    /usr/bin/getent
 Requires(pre):    bash
 Requires(postun): /usr/sbin/userdel
 Requires(postun): bash
-BuildRequires:    python27-devel
-BuildRequires:    python27-virtualenv
+%{?el6:BuildRequires: python27-devel}
+%{?el6:BuildRequires: python27-virtualenv}
+%{?el7:BuildRequires: python-devel}
+%{?el7:BuildRequires: python-virtualenv}
 BuildRequires:    gcc
 BuildRequires:    gcc-c++
 BuildRequires:    make
 BuildRequires:    expat-devel
-BuildRequires:    db4-devel
 BuildRequires:    gdbm-devel
 BuildRequires:    sqlite-devel
-BuildRequires:    libmemcached-devel
 BuildRequires:    readline-devel
 BuildRequires:    zlib-devel
 BuildRequires:    bzip2-devel
@@ -54,11 +77,14 @@ BuildRequires:    freetype-devel
 BuildRequires:    lcms2-devel
 BuildRequires:    proj-devel
 BuildRequires:    geos-devel
-BuildRequires:    postgresql95-devel
+BuildRequires:    libmemcached-devel
+BuildRequires:    postgresql96-devel
 BuildRequires:    unzip
 BuildRequires:    git
-Requires:         python27
-Requires:         python27-virtualenv
+%{?el6:Requires: python27}
+%{?el6:Requires: python27-virtualenv}
+%{?el7:Requires: python}
+%{?el7:Requires: python-virtualenv}
 Requires:         gdal >= 2.0.1
 Requires:         httpd
 Requires:         mod_ssl
@@ -75,42 +101,48 @@ Requires:         geos
 Requires:         rabbitmq-server >= 3.5.6
 Requires:         erlang >= 18.1
 Requires:         libmemcached
+Conflicts:        geonode
 AutoReqProv:      no
 
 %description
 Boundless Exchange is a web-based platform for your content, built for your enterprise.
 It facilitates the creation, sharing, and collaborative use of geospatial data.
 For power users, advanced editing capabilities for versioned workflows via the web browser are included.
-Boundless Exchange is powered by GeoNode, GeoGig and Boundless Suite.
+Boundless Exchange is powered by GeoNode, GeoGig and GeoServer.
 
 %prep
 
 %build
 
 %install
-# exchange module
-BOUNDLESS_LIB=$RPM_BUILD_ROOT/opt/boundless
-mkdir -p $BOUNDLESS_LIB
-pushd $BOUNDLESS_LIB
-git clone %{git_link}
-popd
-EXCHANGE_LIB=$BOUNDLESS_LIB/%{name}
+# create directory structure
+EXCHANGE_LIB=$RPM_BUILD_ROOT/opt/boundless/%{name}
+mkdir -p $EXCHANGE_LIB/{.storage,bex}/{static,media/thumbs}
+touch $EXCHANGE_LIB/bex/__init__.py
+
+# create virtualenv install geonode-exchange and python dependencies
 pushd $EXCHANGE_LIB
-# add docs
-git submodule update --init
-mkdir -p $EXCHANGE_LIB/.storage/{static,media/thumbs}
-# Make sure we don't package .git or dev directories
-rm -rf $EXCHANGE_LIB/{.git,dev}
 
-# create virtualenv install python dependencies
+%if %{?rhel} < 7
+/usr/local/bin/virtualenv .venv
+%else
 virtualenv .venv
-export PATH=/usr/pgsql-9.5/bin:$PATH
-source .venv/bin/activate
-pip install -r requirements.txt
-popd
+%endif
 
-# Make sure we don't package .git
-rm -rf $EXCHANGE_LIB/.venv/src/{geonode,django-maploom,django-geoexplorer}/.git
+export PATH=/usr/pgsql-9.6/bin:$PATH
+source .venv/bin/activate
+python -m pip --version
+
+%if %{?rhel} > 6
+python -m pip install pip==8.1.2 --upgrade
+%endif
+
+# Install requiremtns from specifc commit
+python -m pip install -r https://raw.githubusercontent.com/boundlessgeo/exchange/%{branch}/requirements.txt
+# Install requiremtns from specifc commit
+python -m pip install git+git://github.com/boundlessgeo/exchange.git@%{branch}#egg=geonode-exchange
+
+popd
 
 # setup supervisord configuration
 SUPV_ETC=$RPM_BUILD_ROOT%{_sysconfdir}
@@ -133,14 +165,8 @@ install -m 644 %{SOURCE3} $HTTPD_CONFD/proxy.conf
 # adjust virtualenv to /opt/boundless/exchange path
 VAR0=$RPM_BUILD_ROOT/opt/boundless/%{name}
 VAR1=/opt/boundless/%{name}
-find $VAR0 -type f -name '*pyc' -exec rm {} +
+find $VAR0 -type f -name '*pyc' -exec rm -f {} +
 grep -rl $VAR0 $VAR0 | xargs sed -i 's|'$VAR0'|'$VAR1'|g'
-
-# setup exchange configuration directory
-EXCHANGE_CONF=$RPM_BUILD_ROOT%{_sysconfdir}/%{name}
-mkdir -p $EXCHANGE_CONF
-# local_settings.py
-install -m 775 %{SOURCE4} $EXCHANGE_CONF/local_settings.py
 
 # exchange-config command
 USER_BIN=$RPM_BUILD_ROOT%{_prefix}/bin
@@ -156,6 +182,15 @@ PROFILE_D=$RPM_BUILD_ROOT%{_sysconfdir}/profile.d
 mkdir -p $PROFILE_D
 install -m 755 %{SOURCE8} $PROFILE_D
 
+# bex scripts
+install -m 755 %{SOURCE9} $EXCHANGE_LIB
+install -m 755 %{SOURCE4} $EXCHANGE_LIB/bex
+install -m 755 %{SOURCE10} $EXCHANGE_LIB/bex
+
+# exchange bash_profile
+echo "source /etc/profile.d/exchange-settings.sh" > $EXCHANGE_LIB/.bash_profile
+echo "source /opt/boundless/exchange/.venv/bin/activate" >> $EXCHANGE_LIB/.bash_profile
+
 %pre
 getent group geoservice >/dev/null || groupadd -r geoservice
 usermod -a -G geoservice tomcat
@@ -163,13 +198,6 @@ usermod -a -G geoservice apache
 getent passwd %{name} >/dev/null || useradd -r -d /opt/boundless/%{name} -g geoservice -s /bin/bash -c "Exchange Daemon User" %{name}
 
 %post
-if [ $1 -eq 1 ] ; then
-  ln -s %{_sysconfdir}/%{name}/local_settings.py /opt/boundless/%{name}/%{name}/settings/local_settings.py
-  if [ -d /opt/boundless/%{name}/geoserver_data ]; then
-    chgrp -hR geoservice /opt/boundless/%{name}/geoserver_data
-    chmod -R 775 /opt/boundless/%{name}/geoserver_data
-  fi
-fi
 
 %preun
 find /opt/boundless/%{name} -type f -name '*pyc' -exec rm {} +
@@ -178,44 +206,44 @@ if [ $1 -eq 0 ] ; then
   /sbin/service %{name} stop > /dev/null 2>&1
   /sbin/service httpd stop > /dev/null 2>&1
   /sbin/chkconfig --del %{name}
-  # backup geoserver data dir
-  mkdir -p /opt/boundless/%{name}.rpmsave
-  mv /opt/boundless/%{name}/geoserver_data /opt/boundless/%{name}.rpmsave
-  rm -fr /opt/boundless/%{name}
 fi
 
 %postun
 
 %clean
-#[ ${RPM_BUILD_ROOT} != "/" ] && rm -rf ${RPM_BUILD_ROOT}
+[ ${RPM_BUILD_ROOT} != "/" ] && rm -rf ${RPM_BUILD_ROOT}
 
 %files
-%defattr(755,%{name},geoservice,755)
+%defattr(644,%{name},geoservice,755)
 /opt/boundless/%{name}
-%config(noreplace) %{_sysconfdir}/%{name}/local_settings.py
-%defattr(775,%{name},geoservice,775)
+%defattr(755,%{name},geoservice,755)
+/opt/boundless/%{name}/.venv/bin
+/opt/boundless/%{name}/*.sh
+/opt/boundless/%{name}/*.py
+%defattr(644,%{name},geoservice,755)
 %dir /opt/boundless/%{name}/.storage/static
 %dir /opt/boundless/%{name}/.storage/media
-%defattr(744,%{name},geoservice,744)
+%defattr(644,%{name},geoservice,755)
 %dir %{_localstatedir}/log/celery
 %dir %{_localstatedir}/log/%{name}
-%defattr(644,%{name},geoservice,644)
-%dir %{_sysconfdir}/%{name}/
-%defattr(644,apache,apache,644)
+%defattr(644,apache,apache,755)
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/%{name}.conf
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/proxy.conf
 %defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/supervisord.conf
-%defattr(-,root,root,-)
 %config %{_sysconfdir}/init.d/%{name}
 %{_prefix}/bin/%{name}-config
 %{_sysconfdir}/profile.d/%{name}-settings.sh
-%doc ../SOURCES/license/GNU
+%doc ../SOURCES/license/GPLv2
 
 %changelog
-
+* Thu Nov 10 2016 BerryDaniel <dberry@boundlessgeo.com> [1.1.0rc1-2]
+- adjusted the exchange-config to support el7 firewalld
+* Fri Oct 28 2016 BerryDaniel <dberry@boundlessgeo.com> [1.1.0rc1-1]
+- update for exchange 1.1.0rc1
+- refactored rpmbuild to use exchange package instead of git repo
 * Mon Sep 12 2016 mfairburn <mfairburn@boundlessgeo.com> [1.0.2]
-- Updated to 1.0.2 
+- Updated to 1.0.2
 * Wed Aug 31 2016 amirahav <arahav@boundlessgeo.com> [1.0.1-2]
 - Update to 1.0.1-2
 * Mon Aug 29 2016 amirahav <arahav@boundlessgeo.com> [1.0.1-1]
