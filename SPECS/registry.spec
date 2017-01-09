@@ -173,9 +173,12 @@ fi
 [ ${RPM_BUILD_ROOT} != "/" ] && rm -rf ${RPM_BUILD_ROOT}
 
 %files
-%defattr(755,%{name},geoservice,755)
-/opt/%{name}
 %defattr(644,%{name},geoservice,755)
+/opt/%{name}
+%defattr(755,%{name},geoservice,755)
+/opt/%{name}/.venv/bin
+/opt/%{name}/registry.*
+%defattr(644,apache,apache,-)
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/%{name}-proxy.conf
 %defattr(-,root,root,-)
 %config %{_sysconfdir}/init.d/%{name}

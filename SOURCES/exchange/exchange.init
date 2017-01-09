@@ -95,6 +95,11 @@ stop() {
     done
   fi
 
+  # Kill celery workers if still running. Workers don't always get killed when supervisor is stopped
+  if pgrep celery; then
+    pgrep celery | xargs kill -9
+  fi
+
   # always remove the subsys. We might have waited a while, but just remove it at this point.
   rm -f $LOCKFILE
 }
