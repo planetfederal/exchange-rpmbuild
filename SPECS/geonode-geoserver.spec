@@ -1,7 +1,7 @@
 # Define Constants
 %define name geonode-geoserver
 %define realname geoserver
-%define war_url https://yum-geonode.boundlessps.com/war/latest/geoserver.war
+%define war_url https://exchange-development-war.s3.amazonaws.com/war/geoserver.war
 %define version 2.9.2
 %define release 4
 %define _unpackaged_files_terminate_build 0
