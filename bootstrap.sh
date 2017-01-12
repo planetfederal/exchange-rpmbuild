@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
 
-# Need to change to a new exchange repo
 curl -o /etc/yum.repos.d/exchange.repo https://yum.boundlessps.com/geoshape.repo
 sudo yum -y update
-sudo yum -y install python27-devel \
-                    python27-virtualenv \
-                    gcc \
+version=`rpm -qa \*-release | grep -Ei "redhat|centos" | cut -d"-" -f3`
+if [ $version == 7 ];then
+    sudo yum -y install http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-8.noarch.rpm
+    sudo yum -y install  https://yum.postgresql.org/9.6/redhat/rhel-6-x86_64/pgdg-centos96-9.6-3.noarch.rpm
+    sudo yum -y install python-devel python-virtualenv
+else
+    sudo yum -y install http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
+    sudo yum -y install  https://yum.postgresql.org/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm
+    sudo yum -y install python27-devel python27-virtualenv
+fi
+sudo yum -y install gcc \
                     gcc-c++ \
                     make \
                     expat-devel \
@@ -28,12 +35,17 @@ sudo yum -y install python27-devel \
                     lcms2-devel \
                     proj-devel \
                     geos-devel \
-                    postgresql95-devel \
+                    postgresql96-devel \
                     unzip \
                     git \
                     rpmdevtools \
-                    createrepo
-
-pushd /vagrant/SOURCES
-./get_sources.sh
-popd
+                    createrepo \
+                    libmemcached-devel
+# sudo su - vagrant
+# QA_RPATHS=$[ 0x0001|0x0010 ] rpmbuild --define '_topdir /vagrant' \
+#                                      --define '_sourcedir /vagrant/SOURCES/exchange' \
+#                                      -bb /vagrant/SPECS/exchange.spec
+#
+# QA_RPATHS=$[ 0x0001|0x0010 ] rpmbuild --define '_topdir /vagrant' \
+#                                      --define '_sourcedir /vagrant/SOURCES/geonode-geoserver' \
+#                                      -bb /vagrant/SPECS/geonode-geoserver.spec

@@ -3,4 +3,4 @@
 source /etc/profile.d/exchange-settings.sh
 cd /opt/boundless/exchange
 source .venv/bin/activate
-celery worker --app=exchange.celery_app --uid exchange --loglevel=info
+/opt/boundless/exchange/.venv/bin/waitress-serve --port=8000 bex.wsgi:application

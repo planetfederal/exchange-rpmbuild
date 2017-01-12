@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# supv-geonode   This scripts turns supervisord on
+# supv-geonode   This scripts turns supv_registry on
 # chkconfig:    345 83 04
 # description:  supervisor is a process control utility.  It has a web based
 #               xmlrpc interface as well as a few other nifty features.
@@ -11,13 +11,13 @@
 
 set -a
 
-PREFIX=/opt/boundless/exchange/.venv
-APP=exchange:*
+PREFIX=/opt/registry/.venv
+APP=registry
 SUPERVISORD=$PREFIX/bin/supervisord
 SUPERVISORCTL=$PREFIX/bin/supervisorctl
-PIDFILE=/var/run/supervisor.pid
-LOCKFILE=/var/lock/supervisor.lock
-OPTIONS="-c /etc/supervisord.conf"
+PIDFILE=/var/run/supv_registry.pid
+LOCKFILE=/var/lock/supv_registry.lock
+OPTIONS="-c /opt/registry/supv_registry.conf"
 
 # unset this variable if you don't care to wait for child processes to shutdown before removing the $LOCKFILE
 WAIT_FOR_SUBPROCESSES=yes
@@ -50,42 +50,42 @@ running()
 }
 
 start() {
-  echo "Starting supervisord: "
+  echo "Starting supv_registry: "
 
   if [ -e $PIDFILE ]; then
     echo "ALREADY STARTED"
     return 1
   fi
 
-  # start supervisord with options from sysconfig (stuff like -c)
+  # start supv_registry with options from sysconfig (stuff like -c)
   $SUPERVISORD $OPTIONS
 
   RETVAL=$?
   if [ $RETVAL -eq 0 ]; then
     # show initial startup status
-    $SUPERVISORCTL status $APP
+    $SUPERVISORCTL $OPTIONS status $APP
 
     # only create the subsyslock if we created the PIDFILE
     [ -e $PIDFILE ] && touch $LOCKFILE
   else
-    echo "Failed to start supervisord"
+    echo "Failed to start supv_registry"
   fi
 }
 
 stop() {
-  echo -n "Stopping supervisord: "
-  $SUPERVISORCTL shutdown $APP
+  echo -n "Stopping supv_registry: "
+  $SUPERVISORCTL $OPTIONS shutdown $APP
   if [ -n "$WAIT_FOR_SUBPROCESSES" ]; then
     echo "Waiting for $PIDFILE to be removed after child processes exit"
     total_sleep=1
     sleep $total_sleep
     for sleep in  2 2 2 2 4 4 4 4 8 8 8 8 last; do
       if [ ! -e $PIDFILE ] ; then
-        echo "Supervisord exited as expected in $total_sleep seconds"
+        echo "supv_registry exited as expected in $total_sleep seconds"
         break
       else
         if [[ $sleep -eq "last" ]] ; then
-          echo "Supervisord still working on shutting down."
+          echo "supv_registry still working on shutting down."
           return 1
         else
           sleep $sleep
@@ -120,7 +120,7 @@ case "$1" in
     RETVAL=$?
     ;;
   reload)
-    $SUPERVISORCTL reload $APP
+    $SUPERVISORCTL $OPTIONS reload $APP
     RETVAL=$?
     ;;
   condrestart)
@@ -128,12 +128,12 @@ case "$1" in
     RETVAL=$?
     ;;
   status)
-    my_status=`$SUPERVISORCTL status $APP`
+    my_status=`$SUPERVISORCTL $OPTIONS status $APP`
     if [[ $my_status =~ "no such file" ]];then
-      echo "Exchange is stopped"
+      echo "Registry is stopped"
       exit 1
     else
-      echo "Exchange is running"
+      echo "Registry is running"
     fi
     ;;
   *)
