@@ -51,7 +51,7 @@ vendor=$RPM_BUILD_ROOT/opt/boundless/vendor
 mkdir -p $profile_d $vendor
 cd $vendor
 wget %{__url}%{__name}
-tar -xvf %{__name}
+tar -xvf %{__name} && rm -f %{__name}
 install -m 755 %{SOURCE0} $profile_d/vendor-libs.sh
 
 %post
