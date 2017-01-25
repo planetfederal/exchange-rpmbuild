@@ -49,15 +49,12 @@ Requires(postun): bash
 %{?el6:BuildRequires: python27-virtualenv}
 %{?el7:BuildRequires: python-devel}
 %{?el7:BuildRequires: python-virtualenv}
+BuildRequires:    boundless-vendor-libs
 BuildRequires:    freetype-devel
 BuildRequires:    gcc
-BuildRequires:    gdal-devel >= 2.1.0
-BuildRequires:    geos-devel
 BuildRequires:    git
 BuildRequires:    libxml2-devel
 BuildRequires:    libxslt-devel
-BuildRequires:    postgresql96-devel
-BuildRequires:    proj-devel
 BuildRequires:    sqlite-devel
 BuildRequires:    wget
 BuildRequires:    zlib-devel
@@ -65,12 +62,10 @@ BuildRequires:    zlib-devel
 %{?el6:Requires: python27-virtualenv}
 %{?el7:Requires: python}
 %{?el7:Requires: python-virtualenv}
+Requires:         boundless-vendor-libs
 Requires:         freetype
-Requires:         gdal >= 2.1.0
-Requires:         geos
 Requires:         libxml2
 Requires:         libxslt
-Requires:         proj
 Requires:         zlib
 AutoReqProv:      no
 
@@ -97,7 +92,7 @@ pushd $REGISTRY_ROOT
 virtualenv .venv
 %endif
 
-export PATH=/usr/pgsql-9.6/bin:$PATH
+source /etc/profile.d/vendor-libs.sh
 source .venv/bin/activate
 
 %if %{?rhel} > 6
