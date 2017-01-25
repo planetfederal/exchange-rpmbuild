@@ -1,0 +1,25 @@
+# Systemd unit file for tomcat8
+
+[Unit]
+Description=Apache Tomcat 8 Application
+After=syslog.target network.target
+
+[Service]
+Type=simple
+
+Environment="CATALINA_BASE=/usr/share/tomcat8"
+Environment="CATALINA_PID=$CATALINA_BASE/bin/tomcat.pid"
+Environment="JAVA_OPTS=-Djava.awt.headless=true -Xms256m -Xmx1024m -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:NewRatio=2"
+
+LimitNOFILE=65535
+
+ExecStart=/usr/share/tomcat8/bin/catalina.sh run >> /usr/share/tomcat8/logs/catalina.out 2>&1
+ExecStop=/usr/share/tomcat8/bin/catalina.sh stop >> /usr/share/tomcat8/logs/catalina.out 2>&1
+Restart=on-failure
+RestartSec=2
+
+User=tomcat
+Group=tomcat
+
+[Install]
+WantedBy=multi-user.target
