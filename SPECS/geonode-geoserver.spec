@@ -1,9 +1,28 @@
 # Define Constants
 %define name geonode-geoserver
+%define default_ver 2.9
+%define default_rel 1
+
+%if %{?ver:1}0
+%define version %{ver}
+%else
+%define version %{default_ver}
+%endif
+
+%if %{?rel:1}0
+%define _release %{rel}
+%else
+%define _release %{default_rel}
+%endif
+
+%if %{?commit:1}0
+%define release %{_release}.%{commit}
+%else
+%define release %{_release}
+%endif
+
 %define realname geoserver
 %define war_url https://exchange-development-war.s3.amazonaws.com/war/geoserver.war
-%define version 2.9.2
-%define release 4
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
 %define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
