@@ -1,3 +1,4 @@
+%define pgdir /usr/pgsql-9.6
 %define mver 2.3
 
 Summary:        Geographic Information Systems Extensions to PostgreSQL
@@ -68,7 +69,7 @@ LDFLAGS=-L/opt/boundless/vendor/lib
 export LD_LIBRARY_PATH=/opt/boundless/vendor/lib
 # prevent conflicts with a $PROFILE used in the makefiles
 export PROFILE=
-%configure --with-pgconfig=/usr/pgsql-9.6/bin/pg_config \
+%configure --with-pgconfig=%{pgdir}/bin/pg_config \
            --with-geosconfig=/opt/boundless/vendor/bin/geos-config \
            --with-gdalconfig=/opt/boundless/vendor/bin/gdal-config \
            --with-projdir=/opt/boundless/vendor \
