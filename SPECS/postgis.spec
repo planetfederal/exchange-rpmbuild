@@ -68,7 +68,7 @@ LDFLAGS=-L/opt/boundless/vendor/lib
 export LD_LIBRARY_PATH=/opt/boundless/vendor/lib
 # prevent conflicts with a $PROFILE used in the makefiles
 export PROFILE=
-%configure --with-pgconfig=/opt/boundless/vendor/bin/pg_config \
+%configure --with-pgconfig=/usr/pgsql-9.6/bin/pg_config \
            --with-geosconfig=/opt/boundless/vendor/bin/geos-config \
            --with-gdalconfig=/opt/boundless/vendor/bin/gdal-config \
            --with-projdir=/opt/boundless/vendor \
