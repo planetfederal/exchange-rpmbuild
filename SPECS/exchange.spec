@@ -1,7 +1,7 @@
 # Define Constants
 %define name exchange
 %define _version 1.2.0rc1
-%define _release 1%{?dist}
+%define _release 1
 %define _branch master
 
 %if %{?ver:1}0
@@ -28,7 +28,7 @@
 
 Name:             %{name}
 Version:          %{version}
-Release:          %{release}
+Release:          %{release}%{?dist}
 Summary:          Boundless Exchange, Web GIS for Everyone
 Group:            Applications/Engineering
 License:          GPLv3

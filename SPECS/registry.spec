@@ -1,7 +1,7 @@
 # Define Constants
 %define name registry
 %define _version 0.0.1
-%define _release 1%{?dist}
+%define _release 1
 %define _branch master
 
 %if %{?ver:1}0
@@ -28,7 +28,7 @@
 
 Name:             %{name}
 Version:          %{version}
-Release:          %{release}
+Release:          %{release}%{?dist}
 Summary:          Registry is a web-based platform that captures geo-spatial content using CSW-T protocol.
 Group:            Applications/Engineering
 License:          MIT
