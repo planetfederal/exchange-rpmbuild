@@ -47,16 +47,17 @@ and gdal.
 %install
 [ -d "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 profile_d=$RPM_BUILD_ROOT%{_sysconfdir}/profile.d
+ld_so_conf_d=$RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d
 vendor=$RPM_BUILD_ROOT/opt/boundless/vendor
-mkdir -p $profile_d $vendor
+mkdir -p $profile_d $ld_so_conf_d $vendor
 cd $vendor
 wget %{__url}%{__name}
 tar -xvf %{__name} && rm -f %{__name}
 install -m 755 %{SOURCE0} $profile_d/vendor-libs.sh
+echo "/opt/boundless/vendor/lib" > $ld_so_conf_d/vendor.conf
 
-%post
-%preun
-%postun
+%post -p /sbin/ldconfig
+%postun -p /sbin/ldconfig
 
 %clean
 [ ${RPM_BUILD_ROOT} != "/" ] && rm -rf ${RPM_BUILD_ROOT}
@@ -65,6 +66,7 @@ install -m 755 %{SOURCE0} $profile_d/vendor-libs.sh
 %defattr(755,root,root,755)
 /opt/boundless/vendor
 %{_sysconfdir}/profile.d/vendor-libs.sh
+%{_sysconfdir}//ld.so.conf.d/vendor.conf
 
 %changelog
 * Wed Jan 18 2017 Daniel Berry <dberry@boundlessgeo.com> [1.2.0-1]

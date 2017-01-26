@@ -2,7 +2,7 @@
 %define mver 2.3
 
 Summary:        Geographic Information Systems Extensions to PostgreSQL
-Name:           postgis2-96
+Name:           boundless-postgis2_96
 Version:        2.3.1
 Release:        2%{?dist}
 License:        GPL v2
@@ -29,12 +29,13 @@ BuildRequires:  boundless-vendor-libs
 BuildRequires:  postgresql96-devel
 
 AutoReq:        no
-Requires:       postgresql96-libs
+Requires:       postgresql96-server
 Requires:       boundless-vendor-libs
 Requires:       json-c >= 0.11
 Requires:       libxml2
 Requires:       perl
 Requires:       gettext
+Conflicts:      postgis2_96
 
 %description
 PostGIS adds support for geographic objects to the PostgreSQL object-relational
@@ -64,15 +65,12 @@ The postgis-gui package provides a graphical shapefile loader and dumper for Pos
 %setup -q -n postgis-%{version}
 
 %build
-source /etc/profile.d/vendor-libs.sh
-LDFLAGS=-L/opt/boundless/vendor/lib
-export LD_LIBRARY_PATH=/opt/boundless/vendor/lib
 # prevent conflicts with a $PROFILE used in the makefiles
 export PROFILE=
 %configure --with-pgconfig=%{pgdir}/bin/pg_config \
            --with-geosconfig=/opt/boundless/vendor/bin/geos-config \
            --with-gdalconfig=/opt/boundless/vendor/bin/gdal-config \
-           --with-projdir=/opt/boundless/vendor \
+           --with-projdir="/opt/boundless/vendor" \
            --with-gui
 make
 
@@ -135,12 +133,11 @@ rm -rf %{buildroot}
 %{_bindir}/*.pl
 %{_libdir}/*
 %{_includedir}/*
-%{_mandir}/*
+# %{_mandir}/*
 %{pgdir}/lib/*
 %defattr(644,root,root)
 %{pgdir}/share/contrib/postgis-%{mver}/*
 %{pgdir}/share/extension/*
-#%{pgdir}/share/man/man1/*
 %defattr(755,root,root)
 
 #%files utils
