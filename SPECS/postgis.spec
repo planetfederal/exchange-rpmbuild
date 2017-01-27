@@ -4,7 +4,7 @@
 Summary:        Geographic Information Systems Extensions to PostgreSQL
 Name:           boundless-postgis2_96
 Version:        2.3.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 License:        GPL v2
 Group:          Applications/Databases
 Source:         http://download.osgeo.org/postgis/source/postgis-%{version}.tar.gz
@@ -151,25 +151,5 @@ rm -rf %{buildroot}
 #%{pgdir}/bin/shp2pgsql-gui
 
 %changelog
-* Tue Jan 24 2017 Daniel Berry <dberry@boundlessgeo.com> [2.3.1-1]
-- Added boundless-vendor-libs requirement and bump to 2.3.1
-* Sat Nov 12 2016 amirahav <arahav@boundlessgeo.com> [2.3.0-1]
-- Bump to 2.3.0 and Postgres 9.6
-* Sun Apr 24 2016 amirahav <arahav@boundlessgeo.com> [2.2.2-1]
-- Updated to 2.2.2
-* Sat Jan 16 2016 amirahav <arahav@boundlessgeo.com> [2.2.1-1]
-- Upgrade PostgreSQL to 9.5
-- Upgrade PostGIS to 2.2.1
-* Wed Nov 25 2015 Boundless Spatial, Inc <contact@boundlessgeo.com> - 2.1.8
-- update to postgis 2.1.8
-* Wed Nov 19 2014 Michael Weisman 2.1.4
-- update to postgis 2.1.4
-* Fri Jun 13 2014 Michael Weisman 2.1.3
-- update to postgis 2.1.3
-* Tue May 13 2014 Michael Weisman 2.1.1
-- update to postgis 2.1.2
-* Fri Dec 13 2013 Michael Weisman 2.1.1
-- update to postgis 2.1.1
-* Mon Sep 23 2013 Justin Deoliveira 2.1.0
-- update to postgis 2.1.0
-- separating files into client and server packages
+* Tue Jan 24 2017 Daniel Berry <dberry@boundlessgeo.com> [2.3.1-3]
+- Adjusted build options for vendor-libs
