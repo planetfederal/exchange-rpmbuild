@@ -13,7 +13,7 @@
 
 Name: boundless-vendor-libs
 Version:        1.2.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Boundless vendor install containing Libraries and Headers
 URL:            https://boundlessgeo.com/
 Packager:       Daniel Berry <dberry@boundlessgeo.com>
