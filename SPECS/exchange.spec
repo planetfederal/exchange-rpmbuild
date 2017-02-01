@@ -1,6 +1,6 @@
 # Define Constants
 %define name exchange
-%define _version 1.2.0rc1
+%define _version 1.2.0rc2
 %define _release 1
 %define _branch master
 
@@ -91,8 +91,6 @@ Requires:         libjpeg-turbo
 Requires:         zlib
 Requires:         libtiff
 Requires:         freetype
-Requires:         rabbitmq-server >= 3.5.6
-Requires:         erlang >= 18.1
 Requires:         libmemcached
 Conflicts:        geonode
 AutoReqProv:      no
@@ -186,18 +184,21 @@ echo "source /opt/boundless/exchange/.venv/bin/activate" >> $EXCHANGE_LIB/.bash_
 
 %pre
 getent group geoservice >/dev/null || groupadd -r geoservice
-usermod -a -G geoservice tomcat
-usermod -a -G geoservice apache
-getent passwd %{name} >/dev/null || useradd -r -d /opt/boundless/%{name} -g geoservice -s /bin/bash -c "Exchange Daemon User" %{name}
-
+getent passwd tomcat >/dev/null || usermod -a -G geoservice tomcat >/dev/null
+getent passwd apache >/dev/null || usermod -a -G geoservice apache >/dev/null
+getent passwd %{name} >/dev/null || useradd -r -d /opt/boundless/%{name} -g geoservice -s /bin/bash -c "Exchange Daemon User" %{name} >/dev/null
 %post
 
 %preun
 find /opt/boundless/%{name} -type f -name '*pyc' -exec rm {} +
 if [ $1 -eq 0 ] ; then
-  /sbin/service tomcat8 stop > /dev/null 2>&1
-  /sbin/service %{name} stop > /dev/null 2>&1
-  /sbin/service httpd stop > /dev/null 2>&1
+  if [[ ! -z $(ps -ef | grep tomcat8) ]] ; then
+    /sbin/service tomcat8 stop > /dev/null 2>&1
+    /sbin/service %{name} stop > /dev/null 2>&1
+  fi
+  if [[ ! -z $(ps -ef | grep httpd) ]] ; then
+    /sbin/service httpd stop > /dev/null 2>&1
+  fi
   /sbin/chkconfig --del %{name}
 fi
 
@@ -230,6 +231,8 @@ fi
 %doc ../SOURCES/license/GPLv3
 
 %changelog
+* Wed Feb 01 2017 Daniel Berry <dberry@boundlessgeo.com> [1.2.0rc1-2]
+- Removed rabbitmq requirement and adjustments to pre and preun
 * Tue Jan 24 2017 Daniel Berry <dberry@boundlessgeo.com> [1.2.0rc1-1]
 - Added boundless-vendor-libs requirement
 * Thu Nov 10 2016 BerryDaniel <dberry@boundlessgeo.com> [1.1.0rc1-2]
