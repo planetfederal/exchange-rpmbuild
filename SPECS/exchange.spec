@@ -184,9 +184,9 @@ echo "source /opt/boundless/exchange/.venv/bin/activate" >> $EXCHANGE_LIB/.bash_
 
 %pre
 getent group geoservice >/dev/null || groupadd -r geoservice
-getent passwd tomcat >/dev/null || usermod -a -G geoservice tomcat >/dev/null
-getent passwd apache >/dev/null || usermod -a -G geoservice apache >/dev/null
-getent passwd %{name} >/dev/null || useradd -r -d /opt/boundless/%{name} -g geoservice -s /bin/bash -c "Exchange Daemon User" %{name} >/dev/null
+getent passwd tomcat >/dev/null && usermod -a -G geoservice tomcat >/dev/null
+getent passwd apache >/dev/null && usermod -a -G geoservice apache >/dev/null
+getent passwd %{name} >/dev/null && usermod -a -G geoservice %{name} >/dev/null || useradd -r -d /opt/boundless/%{name} -g geoservice -s /bin/bash -c "Exchange Daemon User" %{name} >/dev/null
 %post
 
 %preun

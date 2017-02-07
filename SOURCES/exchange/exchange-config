@@ -68,16 +68,14 @@ database()
 django()
 {
   source /etc/profile.d/exchange-settings.sh
-  $PYTHON27 $MANAGE makemigrations
   $PYTHON27 $MANAGE migrate account --noinput
   $PYTHON27 $MANAGE migrate --noinput
-  $PYTHON27 $MANAGE loaddata initial
+  $PYTHON27 $MANAGE loaddata default_users
   $PYTHON27 $MANAGE loaddata base_resources
-  $PYTHON27 $MANAGE migrate account --noinput
   $PYTHON27 $MANAGE loaddata default_oauth_apps
   $PYTHON27 $MANAGE collectstatic --noinput
-  chmod 755 -R /opt/boundless/exchange/.storage
-  chown apache:geoservice -R /opt/boundless/exchange/.storage
+  chmod 755 -R $STATIC_ROOT
+  chown apache:geoservice -R $STATIC_ROOT
 }
 
 # configure exchange with selinux
