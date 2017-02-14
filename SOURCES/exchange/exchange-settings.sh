@@ -21,6 +21,7 @@ export STATIC_ROOT='/opt/boundless/exchange/.storage/static_root'
 export STATIC_URL='/static/'
 export MEDIA_ROOT='/opt/boundless/exchange/.storage/media'
 export MEDIA_URL='/media/'
+export FILESERVICE_MEDIA_ROOT='/opt/boundless/exchange/.storage/media/fileservice'
 export DEBUG_STATIC=False
 export ALLOWED_HOSTS="['*']"
 export LANGUAGE_CODE='en-us'
