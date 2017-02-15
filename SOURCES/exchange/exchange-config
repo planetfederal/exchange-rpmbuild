@@ -79,8 +79,8 @@ django()
   $PYTHON27 $MANAGE loaddata base_resources
   $PYTHON27 $MANAGE migrate account --noinput
   $PYTHON27 $MANAGE collectstatic --noinput
-  chmod 755 -R /opt/boundless/exchange/.storage
-  chown exchange:geoservice -R /opt/boundless/exchange/.storage
+  chmod 755 -R $STATIC_ROOT
+  chown exchange:geoservice -R $STATIC_ROOT
 }
 
 # configure exchange with selinux
