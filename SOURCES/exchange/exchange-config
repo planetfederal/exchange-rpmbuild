@@ -75,7 +75,7 @@ django()
   $PYTHON27 $MANAGE loaddata default_oauth_apps
   $PYTHON27 $MANAGE collectstatic --noinput
   chmod 755 -R $STATIC_ROOT
-  chown apache:geoservice -R $STATIC_ROOT
+  chown exchange:geoservice -R $STATIC_ROOT
 }
 
 # configure exchange with selinux
