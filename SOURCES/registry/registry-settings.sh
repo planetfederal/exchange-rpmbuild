@@ -2,6 +2,8 @@
 
 set -e
 
+source /etc/profile.d/vendor-libs.sh
+
 export REGISTRY_DEBUG=${REGISTRY_DEBUG:-'False'}
 export REGISTRY_SECRET_KEY=${REGISTRY_SECRET_KEY:-'Make sure you create a good secret key.'}
 export REGISTRY_MAPPING_PRECISION=${REGISTRY_MAPPING_PRECISION:-'500m'}
