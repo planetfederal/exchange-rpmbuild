@@ -1,7 +1,7 @@
 # Define Constants
 %define name exchange
-%define _version 1.1.0rc1
-%define _release 2%{?dist}
+%define _version 1.2.0rc2
+%define _release 1
 %define _branch master
 
 %if %{?ver:1}0
@@ -28,10 +28,10 @@
 
 Name:             %{name}
 Version:          %{version}
-Release:          %{release}
+Release:          %{release}%{?dist}
 Summary:          Boundless Exchange, Web GIS for Everyone
 Group:            Applications/Engineering
-License:          GPLv2
+License:          GPLv3
 Packager:         BerryDaniel <dberry@boundlessgeo.com>
 Source0:          supervisord.conf
 Source1:          %{name}.init
@@ -55,6 +55,7 @@ Requires(postun): bash
 %{?el6:BuildRequires: python27-virtualenv}
 %{?el7:BuildRequires: python-devel}
 %{?el7:BuildRequires: python-virtualenv}
+BuildRequires:    boundless-vendor-libs
 BuildRequires:    gcc
 BuildRequires:    gcc-c++
 BuildRequires:    make
@@ -67,25 +68,20 @@ BuildRequires:    bzip2-devel
 BuildRequires:    openssl-devel
 BuildRequires:    openldap-devel
 BuildRequires:    tk-devel
-BuildRequires:    gdal-devel >= 2.0.1
 BuildRequires:    libxslt-devel
 BuildRequires:    libxml2-devel
 BuildRequires:    libjpeg-turbo-devel
 BuildRequires:    zlib-devel
 BuildRequires:    libtiff-devel
 BuildRequires:    freetype-devel
-BuildRequires:    lcms2-devel
-BuildRequires:    proj-devel
-BuildRequires:    geos-devel
 BuildRequires:    libmemcached-devel
-BuildRequires:    postgresql96-devel
 BuildRequires:    unzip
 BuildRequires:    git
 %{?el6:Requires: python27}
 %{?el6:Requires: python27-virtualenv}
 %{?el7:Requires: python}
 %{?el7:Requires: python-virtualenv}
-Requires:         gdal >= 2.0.1
+Requires:         boundless-vendor-libs
 Requires:         httpd
 Requires:         mod_ssl
 Requires:         openldap
@@ -95,11 +91,6 @@ Requires:         libjpeg-turbo
 Requires:         zlib
 Requires:         libtiff
 Requires:         freetype
-Requires:         lcms2
-Requires:         proj
-Requires:         geos
-Requires:         rabbitmq-server >= 3.5.6
-Requires:         erlang >= 18.1
 Requires:         libmemcached
 Conflicts:        geonode
 AutoReqProv:      no
@@ -129,7 +120,7 @@ pushd $EXCHANGE_LIB
 virtualenv .venv
 %endif
 
-export PATH=/usr/pgsql-9.6/bin:$PATH
+source /etc/profile.d/vendor-libs.sh
 source .venv/bin/activate
 python -m pip --version
 
@@ -193,18 +184,21 @@ echo "source /opt/boundless/exchange/.venv/bin/activate" >> $EXCHANGE_LIB/.bash_
 
 %pre
 getent group geoservice >/dev/null || groupadd -r geoservice
-usermod -a -G geoservice tomcat
-usermod -a -G geoservice apache
-getent passwd %{name} >/dev/null || useradd -r -d /opt/boundless/%{name} -g geoservice -s /bin/bash -c "Exchange Daemon User" %{name}
-
+getent passwd tomcat >/dev/null && usermod -a -G geoservice tomcat >/dev/null
+getent passwd apache >/dev/null && usermod -a -G geoservice apache >/dev/null
+getent passwd %{name} >/dev/null && usermod -a -G geoservice %{name} >/dev/null || useradd -r -d /opt/boundless/%{name} -g geoservice -s /bin/bash -c "Exchange Daemon User" %{name} >/dev/null
 %post
 
 %preun
 find /opt/boundless/%{name} -type f -name '*pyc' -exec rm {} +
 if [ $1 -eq 0 ] ; then
-  /sbin/service tomcat8 stop > /dev/null 2>&1
-  /sbin/service %{name} stop > /dev/null 2>&1
-  /sbin/service httpd stop > /dev/null 2>&1
+  if [[ ! -z $(ps -ef | grep tomcat8) ]] ; then
+    /sbin/service tomcat8 stop > /dev/null 2>&1
+    /sbin/service %{name} stop > /dev/null 2>&1
+  fi
+  if [[ ! -z $(ps -ef | grep httpd) ]] ; then
+    /sbin/service httpd stop > /dev/null 2>&1
+  fi
   /sbin/chkconfig --del %{name}
 fi
 
@@ -234,9 +228,13 @@ fi
 %config %{_sysconfdir}/init.d/%{name}
 %{_prefix}/bin/%{name}-config
 %{_sysconfdir}/profile.d/%{name}-settings.sh
-%doc ../SOURCES/license/GPLv2
+%doc ../SOURCES/license/GPLv3
 
 %changelog
+* Wed Feb 01 2017 Daniel Berry <dberry@boundlessgeo.com> [1.2.0rc1-2]
+- Removed rabbitmq requirement and adjustments to pre and preun
+* Tue Jan 24 2017 Daniel Berry <dberry@boundlessgeo.com> [1.2.0rc1-1]
+- Added boundless-vendor-libs requirement
 * Thu Nov 10 2016 BerryDaniel <dberry@boundlessgeo.com> [1.1.0rc1-2]
 - adjusted the exchange-config to support el7 firewalld
 * Fri Oct 28 2016 BerryDaniel <dberry@boundlessgeo.com> [1.1.0rc1-1]

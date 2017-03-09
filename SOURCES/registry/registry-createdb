@@ -5,4 +5,7 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+source /etc/profile.d/vendor-libs.sh
+source /etc/profile.d/registry-settings.sh
+
 /opt/registry/.venv/bin/python /opt/registry/registry.py pycsw -c setup_db
