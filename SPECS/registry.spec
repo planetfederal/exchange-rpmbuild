@@ -1,7 +1,7 @@
 # Define Constants
 %define name registry
 %define _version 0.0.1
-%define _release 1%{?dist}
+%define _release 2
 %define _branch master
 
 %if %{?ver:1}0
@@ -28,7 +28,7 @@
 
 Name:             %{name}
 Version:          %{version}
-Release:          %{release}
+Release:          %{release}%{?dist}
 Summary:          Registry is a web-based platform that captures geo-spatial content using CSW-T protocol.
 Group:            Applications/Engineering
 License:          MIT
@@ -49,15 +49,12 @@ Requires(postun): bash
 %{?el6:BuildRequires: python27-virtualenv}
 %{?el7:BuildRequires: python-devel}
 %{?el7:BuildRequires: python-virtualenv}
+BuildRequires:    boundless-vendor-libs
 BuildRequires:    freetype-devel
 BuildRequires:    gcc
-BuildRequires:    gdal-devel >= 2.1.0
-BuildRequires:    geos-devel
 BuildRequires:    git
 BuildRequires:    libxml2-devel
 BuildRequires:    libxslt-devel
-BuildRequires:    postgresql96-devel
-BuildRequires:    proj-devel
 BuildRequires:    sqlite-devel
 BuildRequires:    wget
 BuildRequires:    zlib-devel
@@ -65,12 +62,10 @@ BuildRequires:    zlib-devel
 %{?el6:Requires: python27-virtualenv}
 %{?el7:Requires: python}
 %{?el7:Requires: python-virtualenv}
+Requires:         boundless-vendor-libs
 Requires:         freetype
-Requires:         gdal >= 2.1.0
-Requires:         geos
 Requires:         libxml2
 Requires:         libxslt
-Requires:         proj
 Requires:         zlib
 AutoReqProv:      no
 
@@ -97,7 +92,7 @@ pushd $REGISTRY_ROOT
 virtualenv .venv
 %endif
 
-export PATH=/usr/pgsql-9.6/bin:$PATH
+source /etc/profile.d/vendor-libs.sh
 source .venv/bin/activate
 
 %if %{?rhel} > 6
@@ -133,7 +128,7 @@ install -m 751 %{SOURCE1} $INITD/%{name}
 # install httpd proxy configuration
 HTTPD_CONFD=$RPM_BUILD_ROOT%{_sysconfdir}/httpd/conf.d
 mkdir -p $HTTPD_CONFD
-install -m 644 %{SOURCE2} $HTTPD_CONFD/%{name}-proxy.conf
+install -m 644 %{SOURCE2} $HTTPD_CONFD/_%{name}-proxy.conf
 
 # adjust virtualenv to /opt/registry path
 VAR0=$RPM_BUILD_ROOT/opt/%{name}
@@ -179,12 +174,15 @@ fi
 /opt/%{name}/.venv/bin
 /opt/%{name}/registry.*
 %defattr(644,apache,apache,-)
-%config(noreplace) %{_sysconfdir}/httpd/conf.d/%{name}-proxy.conf
+%config(noreplace) %{_sysconfdir}/httpd/conf.d/_%{name}-proxy.conf
 %defattr(-,root,root,-)
 %config %{_sysconfdir}/init.d/%{name}
 %{_prefix}/bin/%{name}-createdb
 %{_sysconfdir}/profile.d/%{name}-settings.sh
 
 %changelog
+* Thu Feb 2 2017 BerryDaniel <dberry@boundlessgeo.com> [0.0.1-2]
+- NODE-702 (Rename registry_proxy.conf to _registry_proxy.conf)
+- remove trailing slash in proxy conf file
 * Thu Jan 5 2017 BerryDaniel <dberry@boundlessgeo.com> [0.0.1-1]
 - Initial RPM for Registry

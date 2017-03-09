@@ -23,7 +23,7 @@
          FILE
          - outputs to the local filesystem first, before sending it off to the user
       -->
-    <param-value>FILE</param-value>
+    <param-value>PARTIAL-BUFFER2</param-value>
   </context-param>
 
   <!-- If true, enable versioning datastore as well -->
@@ -229,6 +229,11 @@
     <!--  http session listener proxy -->
     <listener>
       <listener-class>org.geoserver.platform.GeoServerHttpSessionListenerProxy</listener-class>
+    </listener>
+
+    <!-- request context listener for session-scoped beans -->
+    <listener>
+      <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
     </listener>
 
     <!-- spring dispatcher servlet, dispatches all incoming requests -->

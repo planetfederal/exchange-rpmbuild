@@ -4,6 +4,7 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+source /etc/profile.d/vendor-libs.sh
 version=`rpm -qa \*-release | grep -Ei "redhat|centos" | cut -d"-" -f3`
 
 usage ()
@@ -28,7 +29,7 @@ database()
 {
   if [ ! -d /var/lib/pgsql/9.6/data/base ]; then
     if [ $version == 7 ];then
-      /usr/pgsql-9.6/bin/postgresql95-setup initdb
+      /usr/pgsql-9.6/bin/postgresql96-setup initdb
     else
       service postgresql-9.6 initdb
     fi
@@ -48,9 +49,6 @@ database()
   if [ $EXCHANGE_DB == 0 ]
   then
     psql -U postgres -c "CREATE DATABASE exchange OWNER exchange;"
-    if [ -f /var/lib/tomcat8/webapps/geoserver/WEB-INF/classes/org/geonode/security/geonode_authorize_layer.sql ]; then
-      psql -U exchange -d exchange -f /var/lib/tomcat8/webapps/geoserver/WEB-INF/classes/org/geonode/security/geonode_authorize_layer.sql
-    fi
   else
     echo "exchange database already created"
   fi
@@ -70,17 +68,14 @@ database()
 django()
 {
   source /etc/profile.d/exchange-settings.sh
-  secretkey=$(cat /dev/urandom | tr -cd "[:alnum:]" | head -c ${1:-32})
-  sed -i "s@\(SECRET_KEY[  ]*=[  ]*\).*@\1\'$secretkey'@g" /opt/boundless/exchange/bex/settings.py
-  $PYTHON27 $MANAGE makemigrations
   $PYTHON27 $MANAGE migrate account --noinput
   $PYTHON27 $MANAGE migrate --noinput
-  $PYTHON27 $MANAGE loaddata initial
+  $PYTHON27 $MANAGE loaddata default_users
   $PYTHON27 $MANAGE loaddata base_resources
-  $PYTHON27 $MANAGE migrate account --noinput
+  $PYTHON27 $MANAGE loaddata default_oauth_apps
   $PYTHON27 $MANAGE collectstatic --noinput
-  chmod 755 -R /opt/boundless/exchange/.storage
-  chown exchange:geoservice -R /opt/boundless/exchange/.storage
+  chmod 755 -R $STATIC_ROOT
+  chown exchange:geoservice -R $STATIC_ROOT
 }
 
 # configure exchange with selinux

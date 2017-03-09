@@ -1,9 +1,28 @@
 # Define Constants
 %define name geonode-geoserver
+%define default_ver 2.9
+%define default_rel 1
+
+%if %{?ver:1}0
+%define version %{ver}
+%else
+%define version %{default_ver}
+%endif
+
+%if %{?rel:1}0
+%define _release %{rel}
+%else
+%define _release %{default_rel}
+%endif
+
+%if %{?commit:1}0
+%define release %{_release}.%{commit}
+%else
+%define release %{_release}
+%endif
+
 %define realname geoserver
 %define war_url https://exchange-development-war.s3.amazonaws.com/war/geoserver.war
-%define version 2.9.2
-%define release 4
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
 %define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
@@ -16,8 +35,7 @@ License:       GPLv2
 AutoReqProv: no
 BuildRequires: unzip
 BuildRequires: wget
-Requires:      geos
-Requires:      proj
+Requires:      boundless-vendor-libs
 Requires:      tomcat8
 Conflicts:     geoserver
 Conflicts:     suite-geoserver
@@ -54,7 +72,7 @@ install -m 644 %{SOURCE1} $DATA/geogig/.geogigconfig
 if [ $1 -eq 1 ] ; then
   # add Java specific options
   echo '# Next line added for geonode service' >> %{_sysconfdir}/sysconfig/tomcat8
-  echo 'JAVA_OPTS="-Djava.awt.headless=true -Xms256m -Xmx1536m -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:SoftRefLRUPolicyMSPerMB=36000 -Duser.home=/opt/geonode/geoserver_data/geogig"' >> %{_sysconfdir}/sysconfig/tomcat8
+  echo 'JAVA_OPTS="-Djava.awt.headless=true -Xms256m -Xmx3026m -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:NewRatio=2 -Djava.library.path=/opt/boundless/vendor/lib:/usr/lib64 -Duser.home=/opt/geonode/geoserver_data/geogig -DGEOSERVER_LOG_LOCATION=/var/log/geoserver/geoserver.log -DGEOSERVER_AUDIT_PATH=/var/log/geoserver -DGEOSERVER_DATA_DIR=/opt/geonode/geoserver_data -DGEOWEBCACHE_CACHE_DIR=/opt/geonode/geoserver_data/gwc"' >> %{_sysconfdir}/sysconfig/tomcat8
 fi
 
 %preun
