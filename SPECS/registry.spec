@@ -99,15 +99,17 @@ source .venv/bin/activate
 python -m pip install pip==8.1.2 --upgrade
 %endif
 
-# Install requirements from specific commit
-python -m pip install -r https://raw.githubusercontent.com/boundlessgeo/registry/%{branch}/requirements.txt
+# .mil adjustments
+mkdir deleteme && cd deleteme
+git clone -b %{branch} https://github.com/boundlessgeo/registry.git
+python -m pip install -r registry/requirements.txt
+cp registry/registry.py ..
+cp registry/documentation.md ..
+cd .. && rm -fr deleteme
 
 # Install additional dependencies
 python -m pip install psycopg2==2.6.1 supervisor==3.3.1 Pillow==3.4.2
 
-# Install registry.py and documentation.md from specific commit
-wget https://raw.githubusercontent.com/boundlessgeo/registry/%{branch}/registry.py
-wget https://raw.githubusercontent.com/boundlessgeo/registry/%{branch}/documentation.md
 
 # modify location in registry.py, so documentation displays at the endpoint
 sed -i 's@documentation.md@/opt/registry/documentation.md@g' registry.py
