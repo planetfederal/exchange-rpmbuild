@@ -128,9 +128,13 @@ python -m pip --version
 python -m pip install pip==8.1.2 --upgrade
 %endif
 
-# Install requiremtns from specifc commit
-python -m pip install -r https://raw.githubusercontent.com/boundlessgeo/exchange/%{branch}/requirements.txt
-# Install requiremtns from specifc commit
+# .mil adjustments
+mkdir deleteme && cd deleteme
+git clone -b %{branch} https://github.com/boundlessgeo/exchange.git
+python -m pip install -r exchange/requirements.txt
+cd .. && rm -fr deleteme
+
+# Install requirements from specifc commit
 python -m pip install git+git://github.com/boundlessgeo/exchange.git@%{branch}#egg=geonode-exchange
 
 popd
