@@ -4,6 +4,14 @@
 %define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
 %define __name vendor-%{version}.%{__dist}.tar.gz
 %define __url https://s3.amazonaws.com/exchange-development-yum/vendor/
+%define _release 2
+
+%if %{?rel:1}0
+%define release %{rel}
+%else
+%define release %{_release}
+%endif
+
 %if %{?rhel} > 6
 %define __dist el7
 %else
@@ -13,7 +21,7 @@
 
 Name: boundless-vendor-libs
 Version:        1.2.0
-Release:        2%{?dist}
+Release:        %{release}%{?dist}
 Summary:        Boundless vendor install containing Libraries and Headers
 URL:            https://boundlessgeo.com/
 Packager:       Daniel Berry <dberry@boundlessgeo.com>
