@@ -135,7 +135,7 @@ python -m pip install -r exchange/requirements.txt
 cd .. && rm -fr deleteme
 
 # Install requirements from specifc commit
-python -m pip install git+git://github.com/boundlessgeo/exchange.git@%{branch}#egg=geonode-exchange
+python -m pip install git+https://github.com/boundlessgeo/exchange.git@%{branch}#egg=geonode-exchange
 
 popd
 
