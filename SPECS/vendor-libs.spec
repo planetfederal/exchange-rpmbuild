@@ -2,8 +2,7 @@
 %define _unpackaged_files_terminate_build 0
 %define debug_package %{nil}
 %define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
-%define __name vendor-%{version}.%{__dist}.tar.gz
-%define __url https://s3.amazonaws.com/exchange-development-yum/vendor/
+%define __url https://s3.amazonaws.com/boundless-packaging/whitelisted/vendor/vendor-%{version}-%{__dist}-%{_arch}.tar.gz
 %define _release 3
 
 %if %{?rel:1}0
@@ -18,7 +17,6 @@
 %define __dist el6
 %endif
 
-
 Name: boundless-vendor-libs
 Version:        1.2.0
 Release:        %{release}%{?dist}
@@ -29,7 +27,6 @@ License:        GPLv2
 Group:          Applications/Engineering
 Source0:        vendor-libs.sh
 BuildRequires:  bzip2
-BuildRequires:  wget
 Requires:       curl
 Requires:       expat
 Requires:       freetype
@@ -58,8 +55,8 @@ ld_so_conf_d=$RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d
 vendor=$RPM_BUILD_ROOT/opt/boundless/vendor
 mkdir -p $profile_d $ld_so_conf_d $vendor
 cd $vendor
-wget %{__url}%{__name}
-tar -xvf %{__name} && rm -f %{__name}
+curl -o download.tar.gz %{__url}
+tar -xvf download.tar.gz && rm -f download.tar.gz
 install -m 755 %{SOURCE0} $profile_d/vendor-libs.sh
 echo "/opt/boundless/vendor/lib" > $ld_so_conf_d/vendor.conf
 
