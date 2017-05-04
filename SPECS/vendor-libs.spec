@@ -4,7 +4,7 @@
 %define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
 %define __name vendor-%{version}.%{__dist}.tar.gz
 %define __url https://s3.amazonaws.com/exchange-development-yum/vendor/
-%define _release 2
+%define _release 3
 
 %if %{?rel:1}0
 %define release %{rel}
@@ -37,7 +37,6 @@ Requires:       libjpeg-turbo
 Requires:       libtiff
 Requires:       libxml2
 Requires:       libxslt
-Requires:       minizip
 Requires:       openldap
 Requires:       poppler
 Requires:       sqlite
@@ -77,5 +76,7 @@ echo "/opt/boundless/vendor/lib" > $ld_so_conf_d/vendor.conf
 %{_sysconfdir}//ld.so.conf.d/vendor.conf
 
 %changelog
+* Thu May 4 2017 Daniel Berry <dberry@boundlessgeo.com> [1.2.0-3]
+- Removed the dependency of minizip
 * Wed Jan 18 2017 Daniel Berry <dberry@boundlessgeo.com> [1.2.0-1]
 - First Build for Boundless Vendor Libraries
