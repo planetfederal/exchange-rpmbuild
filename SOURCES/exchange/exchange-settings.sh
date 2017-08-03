@@ -2,7 +2,6 @@
 
 set -e
 
-<<<<<<< bc27c65f939ba7b1e18350aa41edc3bc2caa97f0
 export SITEURL==${SITEURL:-'http://localhost/'}
 export ES_URL=${ES_URL:-'http://localhost:9200/'}
 export LOCKDOWN_GEONODE=${LOCKDOWN_GEONODE:-'True'}
@@ -55,6 +54,7 @@ export DEFAULT_ANONYMOUS_VIEW_PERMISSION=False
 export DEFAULT_ANONYMOUS_DOWNLOAD_PERMISSION=False
 export DISABLE_BOUNDLESS_LINK_IN_FOOTER=False
 # export WGS84_MAP_CRS=True
+export EXTENT_FILTER_ENABLED=${EXTENT_FILTER_ENABLED:-'False'}
 # export AUTH_LDAP_SERVER_URI=
 # export AUTH_LDAP_BIND_PASSWORD=
 # export AUTH_LDAP_BIND_DN=
