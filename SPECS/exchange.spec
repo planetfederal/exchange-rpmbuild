@@ -129,7 +129,7 @@ python -m pip install pip==8.1.2 --upgrade
 %endif
 
 # Install requiremtns from specifc commit
-python -m pip install --upgrade -r https://raw.githubusercontent.com/boundlessgeo/exchange/%{branch}/requirements.txt
+python -m pip install -r https://raw.githubusercontent.com/boundlessgeo/exchange/%{branch}/requirements.txt
 # Install requiremtns from specifc commit
 python -m pip install git+git://github.com/boundlessgeo/exchange.git@%{branch}#egg=geonode-exchange
 
@@ -183,6 +183,8 @@ echo "source /etc/profile.d/exchange-settings.sh" > $EXCHANGE_LIB/.bash_profile
 echo "source /opt/boundless/exchange/.venv/bin/activate" >> $EXCHANGE_LIB/.bash_profile
 
 %pre
+/sbin/service exchange stop
+rm -rf /opt/boundless/%{name}/.venv
 getent group geoservice >/dev/null || groupadd -r geoservice
 getent passwd tomcat >/dev/null && usermod -a -G geoservice tomcat >/dev/null
 getent passwd apache >/dev/null && usermod -a -G geoservice apache >/dev/null
