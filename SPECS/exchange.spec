@@ -183,6 +183,8 @@ echo "source /etc/profile.d/exchange-settings.sh" > $EXCHANGE_LIB/.bash_profile
 echo "source /opt/boundless/exchange/.venv/bin/activate" >> $EXCHANGE_LIB/.bash_profile
 
 %pre
+/sbin/service exchange stop
+rm -rf /opt/boundless/%{name}/.venv
 getent group geoservice >/dev/null || groupadd -r geoservice
 getent passwd tomcat >/dev/null && usermod -a -G geoservice tomcat >/dev/null
 getent passwd apache >/dev/null && usermod -a -G geoservice apache >/dev/null
