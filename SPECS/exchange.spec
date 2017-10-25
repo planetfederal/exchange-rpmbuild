@@ -1,6 +1,6 @@
 # Define Constants
 %define name exchange
-%define _version 1.2.0rc2
+%define _version 1.3.0
 %define _release 1
 %define _branch master
 
