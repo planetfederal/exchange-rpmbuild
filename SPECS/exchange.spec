@@ -1,6 +1,7 @@
 # Define Constants
 %define name exchange
 %define _version 1.3.0
+%define _tag v1.3.0
 %define _release 1
 %define _branch master
 
@@ -131,11 +132,12 @@ python -m pip install pip==8.1.2 --upgrade
 # .mil adjustments
 mkdir deleteme && cd deleteme
 git clone -b %{branch} https://github.com/boundlessgeo/exchange.git
+git checkout tags/%{tag}
 python -m pip install -r exchange/requirements.txt
 cd .. && rm -fr deleteme
 
 # Install requirements from specifc commit
-python -m pip install git+https://github.com/boundlessgeo/exchange.git@%{branch}#egg=geonode-exchange
+python -m pip install git+https://github.com/boundlessgeo/exchange.git@%{tag}#egg=geonode-exchange
 
 popd
 
