@@ -1,8 +1,8 @@
 # Define Constants
 %define name exchange
-%define _version 1.2.0rc2
+%define _version 1.3.0
 %define _release 1
-%define _branch master
+%define _branch 1.3.0
 
 %if %{?ver:1}0
 %define version %{ver}
