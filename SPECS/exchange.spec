@@ -160,10 +160,10 @@ python setup.py build_sphinx
 cd -
 SITEPACKAGES=.venv/lib/python2.7/site-packages
 mv $SITEPACKAGES/geonode_exchange-*.egg/exchange $SITEPACKAGES/
-rm -rf $SITEPACKAGES/geonode_exchange-*.egg
 mv exchange/docs $SITEPACKAGES/exchange
 rm -rf exchange
 
+#maploom
 mkdir -p $SITEPACKAGES/exchange/maploom/{templates/maploom,templates/maps,static/maploom/fonts,static/maploom/assets}
 
 mv $SITEPACKAGES/maploom/templates/maploom/* $SITEPACKAGES/exchange/maploom/templates/maploom/
