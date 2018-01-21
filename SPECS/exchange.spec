@@ -1,8 +1,10 @@
 # Define Constants
 %define name exchange
-%define _version 1.2.0rc2
+%define _version 1.4.x
 %define _release 1
 %define _branch master
+%define _maploom_branch master
+%define _geonode_branch exchange/1.4.x
 
 %if %{?ver:1}0
 %define version %{ver}
@@ -20,6 +22,19 @@
 %define branch %{commit}
 %else
 %define branch %{_branch}
+%endif
+
+
+%if %{?geonode_commit:1}0
+%define geonode_branch %{geonode_commit}
+%else
+%define geonode_branch %{_geonode_branch}
+%endif
+
+%if %{?maploom_commit:1}0
+%define maploom_branch %{maploom_commit}
+%else
+%define maploom_branch %{_maploom_branch}
 %endif
 
 %define _unpackaged_files_terminate_build 0
@@ -56,6 +71,7 @@ Requires(postun): bash
 %{?el7:BuildRequires: python-devel}
 %{?el7:BuildRequires: python-virtualenv}
 BuildRequires:    boundless-vendor-libs
+BuildRequires:    curl
 BuildRequires:    gcc
 BuildRequires:    gcc-c++
 BuildRequires:    make
@@ -123,15 +139,38 @@ virtualenv .venv
 source /etc/profile.d/vendor-libs.sh
 source .venv/bin/activate
 python -m pip --version
+python -m pip install pip==9.0.1 --upgrade
+pip install setuptools --upgrade
 
-%if %{?rhel} > 6
-python -m pip install pip==8.1.2 --upgrade
-%endif
+# Install requirements from specific commit
+git clone https://github.com/boundlessgeo/exchange.git
+cd exchange
+git checkout tags/%{branch}
+if [[ $? -ne 0 ]];then
+  git checkout %{branch}
+fi
 
-# Install requiremtns from specifc commit
-python -m pip install -r https://raw.githubusercontent.com/boundlessgeo/exchange/%{branch}/requirements.txt
-# Install requiremtns from specifc commit
-python -m pip install git+git://github.com/boundlessgeo/exchange.git@%{branch}#egg=geonode-exchange
+sed -i "5igit+https://github.com/boundlessgeo/django-exchange-maploom.git@%{maploom_branch}#django-exchange-maploom" requirements.txt
+sed -i "5igit+https://github.com/boundlessgeo/geonode@%{geonode_branch}#egg=geonode" requirements.txt
+pip install -r requirements.txt
+
+git submodule update --init --remote --recursive
+python setup.py install
+python setup.py build_sphinx
+cd -
+SITEPACKAGES=.venv/lib/python2.7/site-packages
+mv $SITEPACKAGES/geonode_exchange-*.egg/exchange $SITEPACKAGES/
+rm -rf $SITEPACKAGES/geonode_exchange-*.egg
+mv exchange/docs $SITEPACKAGES/exchange
+rm -rf exchange
+
+mkdir -p $SITEPACKAGES/exchange/maploom/{templates/maploom,templates/maps,static/maploom/fonts,static/maploom/assets}
+
+mv $SITEPACKAGES/maploom/templates/maploom/* $SITEPACKAGES/exchange/maploom/templates/maploom/
+mv $SITEPACKAGES/maploom/templates/maps/maploom.html $SITEPACKAGES/exchange/maploom/templates/maps/
+mv $SITEPACKAGES/maploom/static/maploom/fonts/* $SITEPACKAGES/exchange/maploom/static/maploom/fonts/
+mv $SITEPACKAGES/maploom/static/maploom/assets/* $SITEPACKAGES/exchange/maploom/static/maploom/assets/
+rm -rf $SITEPACKAGES/maploom
 
 popd
 

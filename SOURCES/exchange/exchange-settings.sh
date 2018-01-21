@@ -4,11 +4,13 @@ set -e
 
 export SITEURL==${SITEURL:-'http://localhost/'}
 export ES_URL=${ES_URL:-'http://localhost:9200/'}
+export ES_SEARCH=${ES_SEARCH:-'True'}
 export LOCKDOWN_GEONODE=${LOCKDOWN_GEONODE:-'True'}
 export BROKER_URL=${BROKER_URL:-'amqp://guest:guest@localhost:5672/'}
 export DATABASE_URL=${DATABASE_URL:-'postgres://exchange:boundless@localhost:5432/exchange'}
 export POSTGIS_URL=${POSTGIS_URL:-'postgis://exchange:boundless@localhost:5432/exchange_data'}
 export GEOSERVER_URL=${GEOSERVER_URL:-'http://localhost/geoserver/'}
+export GEOSERVER_LOCAL_URL=${GEOSERVER_URL:-'http://localhost/geoserver/'}
 export GEOSERVER_DATA_DIR=${GEOSERVER_DATA_DIR:-'/opt/geonode/geoserver_data'}
 export GEOSERVER_LOG=${GEOSERVER_LOG:-'/opt/geonode/geoserver_data/logs/geoserver.log'}
 export GEOGIG_DATASTORE_DIR=${GEOGIG_DATASTORE_DIR:-'/opt/geonode/geoserver_data/geogig'}
@@ -32,6 +34,5 @@ export MAP_CLIENT_USE_CROSS_ORIGIN_CREDENTIALS=${MAP_CLIENT_USE_CROSS_ORIGIN_CRE
 # export AUTH_LDAP_BIND_PASSWORD=
 # export AUTH_LDAP_BIND_DN=
 # export LDAP_SEARCH_DN=
-# export REGISTRYURL=
 
 set +e
