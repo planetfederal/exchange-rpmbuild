@@ -155,8 +155,8 @@ sed -i "5igit+https://github.com/boundlessgeo/geonode@%{geonode_branch}#egg=geon
 pip install -r requirements.txt
 
 git submodule update --init --remote --recursive
-python setup.py install
 python setup.py build_sphinx
+python setup.py install
 cd -
 SITEPACKAGES=.venv/lib/python2.7/site-packages
 mv $SITEPACKAGES/geonode_exchange-*.egg/exchange $SITEPACKAGES/
