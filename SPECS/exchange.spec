@@ -152,7 +152,7 @@ fi
 
 sed -i "5igit+https://github.com/boundlessgeo/django-exchange-maploom.git@%{maploom_branch}#django-exchange-maploom" requirements.txt
 sed -i "5igit+https://github.com/boundlessgeo/geonode@%{geonode_branch}#egg=geonode" requirements.txt
-sed -i "/\/vendor\/geonode/d" requirements.txt
+sed -i "/^-e ./d" requirements.txt
 pip install -r requirements.txt
 
 git submodule update --init --remote --recursive
