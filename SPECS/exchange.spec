@@ -5,6 +5,8 @@
 %define _branch master
 %define _maploom_branch master
 %define _geonode_branch exchange/1.4.x
+%define _importer_branch angular-1.6
+%define _arcrest_branch master
 
 %if %{?ver:1}0
 %define version %{ver}
@@ -24,7 +26,6 @@
 %define branch %{_branch}
 %endif
 
-
 %if %{?geonode_commit:1}0
 %define geonode_branch %{geonode_commit}
 %else
@@ -35,6 +36,18 @@
 %define maploom_branch %{maploom_commit}
 %else
 %define maploom_branch %{_maploom_branch}
+%endif
+
+%if %{?importer_commit:1}0
+%define importer_branch %{importer_commit}
+%else
+%define importer_branch %{_importer_branch}
+%endif
+
+%if %{?arcrest_commit:1}0
+%define arcrest_branch %{arcrest_commit}
+%else
+%define arcrest_branch %{_arcrest_branch}
 %endif
 
 %define _unpackaged_files_terminate_build 0
@@ -143,16 +156,19 @@ python -m pip install pip==9.0.1 --upgrade
 pip install setuptools --upgrade
 
 # Install requirements from specific commit
-git clone https://github.com/boundlessgeo/exchange.git
+git clone git@github.com:boundlessgeo/exchange.git
 cd exchange
 git checkout tags/%{branch}
 if [[ $? -ne 0 ]];then
   git checkout %{branch}
 fi
 
-sed -i "5igit+https://github.com/boundlessgeo/django-exchange-maploom.git@%{maploom_branch}#django-exchange-maploom" requirements.txt
-sed -i "5igit+https://github.com/boundlessgeo/geonode@%{geonode_branch}#egg=geonode" requirements.txt
 sed -i "/^-e ./d" requirements.txt
+sed -i "5igit+https://github.com/boundlessgeo/django-exchange-maploom.git@%{maploom_branch}#django-exchange-maploom" requirements.txt
+sed -i "5igit+https://github.com/boundlessgeo/geonode.git@%{geonode_branch}#egg=geonode" requirements.txt
+sed -i "5igit+https://github.com/GeoNode/django-osgeo-importer.git@%{importer_branch}#egg=django-osgeo-importer" requirements.txt
+sed -i "5igit+https://github.com/boundlessgeo/ArcREST.git@%{arcrest_branch}#subdirectory=src" requirements.txt
+
 pip install -r requirements.txt
 
 git submodule update --init --remote --recursive
