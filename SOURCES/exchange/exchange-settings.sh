@@ -3,7 +3,7 @@
 set -e
 
 export SITEURL=${SITEURL:-'http://localhost/'}
-export EXCHANGE_LOCAL_URL=${EXCHANGE_LOCAL_URL:-'http://localhost/'}
+export EXCHANGE_LOCAL_URL=${EXCHANGE_LOCAL_URL:-'http://localhost:8000/'}
 export ES_URL=${ES_URL:-'http://localhost:9200/'}
 export LOCKDOWN_GEONODE=${LOCKDOWN_GEONODE:-'True'}
 export BROKER_URL=${BROKER_URL:-'amqp://guest:guest@localhost:5672/'}
