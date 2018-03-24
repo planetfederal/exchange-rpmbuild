@@ -3,8 +3,6 @@
 %define _version 1.4.x
 %define _release 1
 %define _branch master
-%define _maploom_branch master
-%define _geonode_branch exchange/1.4.x
 
 %if %{?ver:1}0
 %define version %{ver}
@@ -22,19 +20,6 @@
 %define branch %{commit}
 %else
 %define branch %{_branch}
-%endif
-
-
-%if %{?geonode_commit:1}0
-%define geonode_branch %{geonode_commit}
-%else
-%define geonode_branch %{_geonode_branch}
-%endif
-
-%if %{?maploom_commit:1}0
-%define maploom_branch %{maploom_commit}
-%else
-%define maploom_branch %{_maploom_branch}
 %endif
 
 %define _unpackaged_files_terminate_build 0
@@ -93,6 +78,7 @@ BuildRequires:    freetype-devel
 BuildRequires:    libmemcached-devel
 BuildRequires:    unzip
 BuildRequires:    git
+BuildRequires:    nodejs
 %{?el6:Requires: python27}
 %{?el6:Requires: python27-virtualenv}
 %{?el7:Requires: python}
@@ -143,36 +129,67 @@ python -m pip install pip==9.0.1 --upgrade
 pip install setuptools --upgrade
 
 # Install requirements from specific commit
-git clone https://github.com/boundlessgeo/exchange.git
+git clone git@github.com:boundlessgeo/exchange.git
 cd exchange
 git checkout tags/%{branch}
 if [[ $? -ne 0 ]];then
   git checkout %{branch}
 fi
 
-sed -i "5igit+https://github.com/boundlessgeo/django-exchange-maploom.git@%{maploom_branch}#django-exchange-maploom" requirements.txt
-sed -i "5igit+https://github.com/boundlessgeo/geonode@%{geonode_branch}#egg=geonode" requirements.txt
-sed -i "/^-e ./d" requirements.txt
+git submodule update --init --recursive
 pip install -r requirements.txt
 
-git submodule update --init --remote --recursive
+
+### Build maploom
+pushd vendor/maploom
+npm install
+bower install --allow-root
+grunt
+PACKAGE_VERSION=$(cat package.json \
+| grep version \
+| head -1 \
+| awk -F: '{ print $2 }' \
+| sed 's/[",]//g')
+VERSION=${PACKAGE_VERSION// /}
+echo "{% load i18n static %}
+<link rel=\"stylesheet\" type=\"text/css\" href=\"{% static 'maploom/assets/MapLoom-$VERSION.css' %}\"/>
+<script type=\"text/javascript\" src=\"{% static 'maploom/assets/MapLoom-$VERSION.js' %}\"/>" > bin/_maploom_js.html
+sed -n '/body class="maploom-body">/,/body>/p' bin/index.html > bin/index_body.html
+sed '/body>/d' bin/index_body.html > bin/index_body_no_tag.html
+echo '{% load staticfiles i18n %}{% verbatim %}' > bin/_maploom_map.html
+cat bin/index_body_no_tag.html >> bin/_maploom_map.html
+echo '{% endverbatim %}' >> bin/_maploom_map.html
+popd
+
+if [[ -f exchange/maploom/templates/maploom/_maploom_js.html ]];then
+  rm -f exchange/maploom/templates/maploom/_maploom_js.html
+fi
+if [[ -f exchange/maploom/templates/maploom/_maploom_map.html ]];then
+  rm -f exchange/maploom/templates/maploom/_maploom_map.html
+fi
+if [[ -f exchange/maploom/templates/maps/maploom.html ]];then
+  rm -f exchange/maploom/templates/maps/maploom.html
+fi
+if [[ -d exchange/maploom/static/maploom ]];then
+  rm -rf exchange/maploom/static/maploom
+fi
+
+mkdir exchange/maploom/static/maploom
+cp vendor/maploom/bin/_maploom_js.html exchange/maploom/templates/maploom/_maploom_js.html
+cp vendor/maploom/bin/_maploom_map.html exchange/maploom/templates/maploom/_maploom_map.html
+cp vendor/maploom/bin/maploom.html exchange/maploom/templates/maps/maploom.html
+cp -r vendor/maploom/bin/assets exchange/maploom/static/maploom/assets
+cp -r vendor/maploom/bin/fonts exchange/maploom/static/maploom/fonts
+### end maploom build
+
+
 python setup.py build_sphinx
 python setup.py install
-cd -
+pushd $EXCHANGE_LIB
 SITEPACKAGES=.venv/lib/python2.7/site-packages
 mv $SITEPACKAGES/geonode_exchange-*.egg/exchange $SITEPACKAGES/
 mv exchange/docs $SITEPACKAGES/exchange
 rm -rf exchange
-
-#maploom
-mkdir -p $SITEPACKAGES/exchange/maploom/{templates/maploom,templates/maps,static/maploom/fonts,static/maploom/assets}
-
-mv $SITEPACKAGES/maploom/templates/maploom/* $SITEPACKAGES/exchange/maploom/templates/maploom/
-mv $SITEPACKAGES/maploom/templates/maps/maploom.html $SITEPACKAGES/exchange/maploom/templates/maps/
-mv $SITEPACKAGES/maploom/static/maploom/fonts/* $SITEPACKAGES/exchange/maploom/static/maploom/fonts/
-mv $SITEPACKAGES/maploom/static/maploom/assets/* $SITEPACKAGES/exchange/maploom/static/maploom/assets/
-rm -rf $SITEPACKAGES/maploom
-
 popd
 
 # setup supervisord configuration
