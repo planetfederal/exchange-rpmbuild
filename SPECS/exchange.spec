@@ -189,6 +189,11 @@ pushd $EXCHANGE_LIB
 SITEPACKAGES=.venv/lib/python2.7/site-packages
 mv $SITEPACKAGES/geonode_exchange-*.egg/exchange $SITEPACKAGES/
 mv exchange/docs $SITEPACKAGES/exchange
+mv exchange/vendor/geonode/geonode $SITEPACKAGES/geonode
+mv exchange/vendor/django-osgeo-importer/osgeo_importer $SITEPACKAGES/osgeo_importer
+mv exchange/vendor/django-osgeo-importer/osgeo_importer_prj $SITEPACKAGES/osgeo_importer_prj
+rm -f $SITEPACKAGES/django-osgeo-importer.egg-link
+rm -f $SITEPACKAGES/GeoNode.egg-link
 rm -rf exchange
 popd
 
