@@ -192,8 +192,11 @@ mv exchange/docs $SITEPACKAGES/exchange
 mv exchange/vendor/geonode/geonode $SITEPACKAGES/geonode
 mv exchange/vendor/django-osgeo-importer/osgeo_importer $SITEPACKAGES/osgeo_importer
 mv exchange/vendor/django-osgeo-importer/osgeo_importer_prj $SITEPACKAGES/osgeo_importer_prj
+mv exchange/vendor/arcrest/src/arcrest $SITEPACKAGES/arcrest
+mv exchange/vendor/arcrest/src/arcresthelper $SITEPACKAGES/arcresthelper
 rm -f $SITEPACKAGES/django-osgeo-importer.egg-link
 rm -f $SITEPACKAGES/GeoNode.egg-link
+rm -f $SITEPACKAGES/ArcREST-Package.egg-link
 rm -rf exchange
 popd
 
