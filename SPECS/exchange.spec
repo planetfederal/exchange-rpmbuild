@@ -125,7 +125,7 @@ virtualenv .venv
 source /etc/profile.d/vendor-libs.sh
 source .venv/bin/activate
 python -m pip --version
-python -m pip install pip==9.0.1 --upgrade
+python -m pip install pip==9.0.3 --upgrade
 pip install setuptools --upgrade
 
 # Install requirements from specific commit
@@ -137,6 +137,7 @@ if [[ $? -ne 0 ]];then
 fi
 
 git submodule update --init --recursive
+sed -i "s/-e //g" requirements.txt
 pip install -r requirements.txt
 
 
@@ -189,11 +190,6 @@ pushd $EXCHANGE_LIB
 SITEPACKAGES=.venv/lib/python2.7/site-packages
 mv $SITEPACKAGES/geonode_exchange-*.egg/exchange $SITEPACKAGES/
 mv exchange/docs $SITEPACKAGES/exchange
-mv exchange/vendor/geonode/geonode $SITEPACKAGES/geonode
-mv exchange/vendor/django-osgeo-importer/osgeo_importer $SITEPACKAGES/osgeo_importer
-mv exchange/vendor/django-osgeo-importer/osgeo_importer_prj $SITEPACKAGES/osgeo_importer_prj
-rm -f $SITEPACKAGES/django-osgeo-importer.egg-link
-rm -f $SITEPACKAGES/GeoNode.egg-link
 rm -rf exchange
 popd
 
