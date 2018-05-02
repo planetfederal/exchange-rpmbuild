@@ -26,6 +26,7 @@ Packager:       Daniel Berry <dberry@boundlessgeo.com>
 License:        GPLv2
 Group:          Applications/Engineering
 Source0:        vendor-libs.sh
+Source1:        vendor-libs.tar.gz
 BuildRequires:  bzip2
 Requires:       curl
 Requires:       expat
@@ -55,8 +56,8 @@ ld_so_conf_d=$RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d
 vendor=$RPM_BUILD_ROOT/opt/boundless/vendor
 mkdir -p $profile_d $ld_so_conf_d $vendor
 cd $vendor
-curl -o download.tar.gz %{__url}
-tar -xvf download.tar.gz && rm -f download.tar.gz
+install -m 755 %{SOURCE1} .
+tar -xvf vendor-%{version}-%{__dist}-%{_arch}.tar.gz && rm -f vendor-%{version}-%{__dist}-%{_arch}.tar.gz
 install -m 755 %{SOURCE0} $profile_d/vendor-libs.sh
 echo "/opt/boundless/vendor/lib" > $ld_so_conf_d/vendor.conf
 
