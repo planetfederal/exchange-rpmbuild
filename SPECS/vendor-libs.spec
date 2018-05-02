@@ -57,7 +57,7 @@ vendor=$RPM_BUILD_ROOT/opt/boundless/vendor
 mkdir -p $profile_d $ld_so_conf_d $vendor
 cd $vendor
 install -m 755 %{SOURCE1} .
-tar -xvf vendor-%{version}-%{__dist}-%{_arch}.tar.gz && rm -f vendor-%{version}-%{__dist}-%{_arch}.tar.gz
+tar -xvf vendor-libs.tar.gz && rm -f vendor-libs.tar.gz
 install -m 755 %{SOURCE0} $profile_d/vendor-libs.sh
 echo "/opt/boundless/vendor/lib" > $ld_so_conf_d/vendor.conf
 

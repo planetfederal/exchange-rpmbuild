@@ -2,7 +2,6 @@
 %define name exchange
 %define _version 1.4.x
 %define _release 1
-%define _branch master
 
 %if %{?ver:1}0
 %define version %{ver}
@@ -14,12 +13,6 @@
 %define release %{rel}
 %else
 %define release %{_release}
-%endif
-
-%if %{?commit:1}0
-%define branch %{commit}
-%else
-%define branch %{_branch}
 %endif
 
 %define _unpackaged_files_terminate_build 0
@@ -46,6 +39,7 @@ Source7:          waitress.sh
 Source8:          %{name}-settings.sh
 Source9:          manage.py
 Source10:         wsgi.py
+Source11:         %{name}.tar.gz
 Requires(pre):    /usr/sbin/useradd
 Requires(pre):    /usr/bin/getent
 Requires(pre):    bash
@@ -110,7 +104,7 @@ Boundless Exchange is powered by GeoNode, GeoGig and GeoServer.
 %install
 # create directory structure
 EXCHANGE_LIB=$RPM_BUILD_ROOT/opt/boundless/%{name}
-mkdir -p $EXCHANGE_LIB/{.storage,bex}/{static,media/thumbs}
+mkdir -p $EXCHANGE_LIB/{.storage,bex,exchange}/{static,media/thumbs}
 touch $EXCHANGE_LIB/bex/__init__.py
 
 # create virtualenv install geonode-exchange and python dependencies
@@ -128,17 +122,10 @@ python -m pip --version
 python -m pip install pip==9.0.3 --upgrade
 pip install setuptools --upgrade
 
-# Install requirements from specific commit
-echo $PWD
-ls
-git clone git@github.com:boundlessgeo/exchange.git
+# Install exchange source
 cd exchange
-git checkout tags/%{branch}
-if [[ $? -ne 0 ]];then
-  git checkout %{branch}
-fi
-
-git submodule update --init --recursive
+install -m 755 %{SOURCE11} .
+tar -xvf exchange.tar.gz && rm -f exchange.tar.gz
 sed -i "s/-e //g" requirements.txt
 pip install -r requirements.txt
 
