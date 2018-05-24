@@ -130,7 +130,7 @@ pip install setuptools --upgrade
 
 # Install requirements from specific commit
 git clone git@github.com:boundlessgeo/ps-exchange.git
-cd exchange
+cd ps-exchange
 git checkout tags/%{branch}
 if [[ $? -ne 0 ]];then
   git checkout %{branch}
@@ -176,10 +176,10 @@ if [[ -d exchange/maploom/static/maploom ]];then
 fi
 
 mkdir exchange/maploom/static/maploom
-cp vendor/maploom/bin/_maploom_js.html exchange/maploom/templates/maploom/_maploom_js.html
-cp vendor/maploom/bin/_maploom_map.html exchange/maploom/templates/maploom/_maploom_map.html
-cp vendor/maploom/bin/maploom.html exchange/maploom/templates/maps/maploom.html
-cp -r vendor/maploom/bin/assets exchange/maploom/static/maploom/assets
+cp vendor/maploom/bin/_maploom_js.html ps-exchange/maploom/templates/maploom/_maploom_js.html
+cp vendor/maploom/bin/_maploom_map.html ps-exchange/maploom/templates/maploom/_maploom_map.html
+cp vendor/maploom/bin/maploom.html ps-exchange/maploom/templates/maps/maploom.html
+cp -r vendor/maploom/bin/assets pexchange/maploom/static/maploom/assets
 cp -r vendor/maploom/bin/fonts exchange/maploom/static/maploom/fonts
 ### end maploom build
 
