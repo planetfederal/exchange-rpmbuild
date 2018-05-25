@@ -25,7 +25,7 @@
 
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
-%define _rpmfilename %%{MARS}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
+%define _rpmfilename exchange-mars-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
 
 Name:             %{name}
 Version:          %{version}
