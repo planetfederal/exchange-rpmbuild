@@ -1,5 +1,5 @@
 # Define Constants
-%define name exchange
+%define name exchange-mars
 %define _version 1.4.x
 %define _release 1
 %define _branch master
@@ -131,6 +131,7 @@ pip install setuptools --upgrade
 # Install requirements from specific commit
 git clone git@github.com:boundlessgeo/ps-exchange.git
 cd ps-exchange
+mv ps-exchange exchange
 git checkout tags/%{branch}
 if [[ $? -ne 0 ]];then
   git checkout %{branch}
@@ -176,10 +177,10 @@ if [[ -d exchange/maploom/static/maploom ]];then
 fi
 
 mkdir exchange/maploom/static/maploom
-cp vendor/maploom/bin/_maploom_js.html ps-exchange/maploom/templates/maploom/_maploom_js.html
-cp vendor/maploom/bin/_maploom_map.html ps-exchange/maploom/templates/maploom/_maploom_map.html
-cp vendor/maploom/bin/maploom.html ps-exchange/maploom/templates/maps/maploom.html
-cp -r vendor/maploom/bin/assets pexchange/maploom/static/maploom/assets
+cp vendor/maploom/bin/_maploom_js.html exchange/maploom/templates/maploom/_maploom_js.html
+cp vendor/maploom/bin/_maploom_map.html exchange/maploom/templates/maploom/_maploom_map.html
+cp vendor/maploom/bin/maploom.html exchange/maploom/templates/maps/maploom.html
+cp -r vendor/maploom/bin/assets exchange/maploom/static/maploom/assets
 cp -r vendor/maploom/bin/fonts exchange/maploom/static/maploom/fonts
 ### end maploom build
 
@@ -189,8 +190,8 @@ python setup.py install
 pushd $EXCHANGE_LIB
 SITEPACKAGES=.venv/lib/python2.7/site-packages
 mv $SITEPACKAGES/geonode_exchange-*.egg/exchange $SITEPACKAGES/
-mv exchange/docs $SITEPACKAGES/exchange
-rm -rf exchange
+mv ps-exchange/docs $SITEPACKAGES/exchange
+rm -rf ps-exchange
 popd
 
 # setup supervisord configuration
