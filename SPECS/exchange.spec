@@ -1,5 +1,6 @@
 # Define Constants
-%define name exchange-mars
+%define name exchange
+%define mars exchange-mars
 %define _version 1.4.x
 %define _release 1
 %define _branch master
@@ -24,7 +25,7 @@
 
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
-%define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
+%define _rpmfilename %%{MARS}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
 
 Name:             %{name}
 Version:          %{version}
