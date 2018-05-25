@@ -194,6 +194,11 @@ mv ps-exchange/docs $SITEPACKAGES/exchange
 rm -rf ps-exchange
 popd
 
+#install mgis sustainability app
+pushd exchange/sustainability/webapp
+npm install && npm run build-css && npm run build
+popd
+
 # setup supervisord configuration
 SUPV_ETC=$RPM_BUILD_ROOT%{_sysconfdir}
 mkdir -p $SUPV_ETC
