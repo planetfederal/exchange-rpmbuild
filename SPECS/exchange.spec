@@ -1,5 +1,5 @@
 # Define Constants
-%define name exchange
+%define name exchange-mars
 %define _version 1.4.x
 %define _release 1
 %define _branch master
@@ -24,9 +24,9 @@
 
 %define _unpackaged_files_terminate_build 0
 %define __os_install_post %{nil}
-%define _rpmfilename %%{NAME}-mars--%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
+%define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
 
-Name:             %{name}-mars
+Name:             %{name}
 Version:          %{version}
 Release:          %{release}%{?dist}
 Summary:          Boundless Exchange, Web GIS for Everyone
@@ -34,16 +34,16 @@ Group:            Applications/Engineering
 License:          GPLv3
 Packager:         BerryDaniel <dberry@boundlessgeo.com>
 Source0:          supervisord.conf
-Source1:          %{name}.init
-%{?el6:Source2: %{name}-el6.conf}
+Source1:          exchange.init
+%{?el6:Source2: exchange-el6.conf}
 %{?el6:Source3: proxy-el6.conf}
-%{?el7:Source2: %{name}-el7.conf}
+%{?el7:Source2: exchange-el7.conf}
 %{?el7:Source3: proxy-el7.conf}
 Source4:          settings.py
-Source5:          %{name}-config
+Source5:          exchange-config
 Source6:          celery-worker.sh
 Source7:          waitress.sh
-Source8:          %{name}-settings.sh
+Source8:          exchange-settings.sh
 Source9:          manage.py
 Source10:         wsgi.py
 Requires(pre):    /usr/sbin/useradd
@@ -109,7 +109,7 @@ Boundless Exchange is powered by GeoNode, GeoGig and GeoServer.
 
 %install
 # create directory structure
-EXCHANGE_LIB=$RPM_BUILD_ROOT/opt/boundless/%{name}
+EXCHANGE_LIB=$RPM_BUILD_ROOT/opt/boundless/exchange
 mkdir -p $EXCHANGE_LIB/{.storage,bex}/{static,media/thumbs}
 touch $EXCHANGE_LIB/bex/__init__.py
 
@@ -203,23 +203,23 @@ popd
 SUPV_ETC=$RPM_BUILD_ROOT%{_sysconfdir}
 mkdir -p $SUPV_ETC
 install -m 644 %{SOURCE0} $SUPV_ETC/supervisord.conf
-mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log/%{name}
+mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log/exchange
 mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log/celery
 
 # setup init.d script
 INITD=$RPM_BUILD_ROOT%{_sysconfdir}/init.d
 mkdir -p $INITD
-install -m 751 %{SOURCE1} $INITD/%{name}
+install -m 751 %{SOURCE1} $INITD/exchange
 
 # setup httpd configuration
 HTTPD_CONFD=$RPM_BUILD_ROOT%{_sysconfdir}/httpd/conf.d
 mkdir -p $HTTPD_CONFD
-install -m 644 %{SOURCE2} $HTTPD_CONFD/%{name}.conf
+install -m 644 %{SOURCE2} $HTTPD_CONFD/exchange.conf
 install -m 644 %{SOURCE3} $HTTPD_CONFD/proxy.conf
 
 # adjust virtualenv to /opt/boundless/exchange path
-VAR0=$RPM_BUILD_ROOT/opt/boundless/%{name}
-VAR1=/opt/boundless/%{name}
+VAR0=$RPM_BUILD_ROOT/opt/boundless/exchange
+VAR1=/opt/boundless/exchange
 find $VAR0 -type f -name '*pyc' -exec rm -f {} +
 grep -rl $VAR0 $VAR0 | xargs sed -i 's|'$VAR0'|'$VAR1'|g'
 
@@ -248,24 +248,24 @@ echo "source /opt/boundless/exchange/.venv/bin/activate" >> $EXCHANGE_LIB/.bash_
 
 %pre
 /sbin/service exchange stop
-rm -rf /opt/boundless/%{name}/.venv
+rm -rf /opt/boundless/exchange/.venv
 getent group geoservice >/dev/null || groupadd -r geoservice
 getent passwd tomcat >/dev/null && usermod -a -G geoservice tomcat >/dev/null
 getent passwd apache >/dev/null && usermod -a -G geoservice apache >/dev/null
-getent passwd %{name} >/dev/null && usermod -a -G geoservice %{name} >/dev/null || useradd -r -d /opt/boundless/%{name} -g geoservice -s /bin/bash -c "Exchange Daemon User" %{name} >/dev/null
+getent passwd exchange >/dev/null && usermod -a -G geoservice exchange >/dev/null || useradd -r -d /opt/boundless/exchange -g geoservice -s /bin/bash -c "Exchange Daemon User" exchange >/dev/null
 %post
 
 %preun
-find /opt/boundless/%{name} -type f -name '*pyc' -exec rm {} +
+find /opt/boundless/exchange -type f -name '*pyc' -exec rm {} +
 if [ $1 -eq 0 ] ; then
   if [[ ! -z $(ps -ef | grep tomcat8) ]] ; then
     /sbin/service tomcat8 stop > /dev/null 2>&1
-    /sbin/service %{name} stop > /dev/null 2>&1
+    /sbin/service exchange stop > /dev/null 2>&1
   fi
   if [[ ! -z $(ps -ef | grep httpd) ]] ; then
     /sbin/service httpd stop > /dev/null 2>&1
   fi
-  /sbin/chkconfig --del %{name}
+  /sbin/chkconfig --del exchange
 fi
 
 %postun
@@ -274,26 +274,26 @@ fi
 [ ${RPM_BUILD_ROOT} != "/" ] && rm -rf ${RPM_BUILD_ROOT}
 
 %files
-%defattr(644,%{name},geoservice,755)
-/opt/boundless/%{name}
-%defattr(755,%{name},geoservice,755)
-/opt/boundless/%{name}/.venv/bin
-/opt/boundless/%{name}/*.sh
-/opt/boundless/%{name}/*.py
-%defattr(644,%{name},geoservice,755)
-%dir /opt/boundless/%{name}/.storage/static
-%dir /opt/boundless/%{name}/.storage/media
-%defattr(644,%{name},geoservice,755)
+%defattr(644,exchange,geoservice,755)
+/opt/boundless/exchange
+%defattr(755,exchange,geoservice,755)
+/opt/boundless/exchange/.venv/bin
+/opt/boundless/exchange/*.sh
+/opt/boundless/exchange/*.py
+%defattr(644,exchange,geoservice,755)
+%dir /opt/boundless/exchange/.storage/static
+%dir /opt/boundless/exchange/.storage/media
+%defattr(644,exchange,geoservice,755)
 %dir %{_localstatedir}/log/celery
-%dir %{_localstatedir}/log/%{name}
+%dir %{_localstatedir}/log/exchange
 %defattr(644,apache,apache,755)
-%config(noreplace) %{_sysconfdir}/httpd/conf.d/%{name}.conf
+%config(noreplace) %{_sysconfdir}/httpd/conf.d/exchange.conf
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/proxy.conf
 %defattr(-,root,root,-)
 %config(noreplace) %{_sysconfdir}/supervisord.conf
-%config %{_sysconfdir}/init.d/%{name}
-%{_prefix}/bin/%{name}-config
-%{_sysconfdir}/profile.d/%{name}-settings.sh
+%config %{_sysconfdir}/init.d/exchange
+%{_prefix}/bin/exchange-config
+%{_sysconfdir}/profile.d/exchange-settings.sh
 %doc ../SOURCES/license/GPLv3
 
 %changelog
