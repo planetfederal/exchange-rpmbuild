@@ -185,6 +185,11 @@ cp -r vendor/maploom/bin/fonts exchange/maploom/static/maploom/fonts
 ### end maploom build
 
 
+#install mgis sustainability app
+pushd exchange/sustainability/webapp
+npm install && npm run build-css && npm run build
+popd
+
 python setup.py build_sphinx
 python setup.py install
 pushd $EXCHANGE_LIB
@@ -192,11 +197,6 @@ SITEPACKAGES=.venv/lib/python2.7/site-packages
 mv $SITEPACKAGES/geonode_exchange-*.egg/exchange $SITEPACKAGES/
 mv ps-exchange/docs $SITEPACKAGES/exchange
 rm -rf ps-exchange
-popd
-
-#install mgis sustainability app
-pushd exchange/sustainability/webapp
-npm install && npm run build-css && npm run build
 popd
 
 # setup supervisord configuration
