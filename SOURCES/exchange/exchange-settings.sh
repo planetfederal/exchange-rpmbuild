@@ -2,7 +2,8 @@
 
 set -e
 
-export SITEURL==${SITEURL:-'http://localhost/'}
+export SITEURL=${SITEURL:-'http://localhost/'}
+export EXCHANGE_LOCAL_URL=${EXCHANGE_LOCAL_URL:-'http://localhost:8000/'}
 export ES_URL=${ES_URL:-'http://localhost:9200/'}
 export ES_SEARCH=${ES_SEARCH:-'True'}
 export LOCKDOWN_GEONODE=${LOCKDOWN_GEONODE:-'True'}
