@@ -144,8 +144,9 @@ pip install -r requirements.txt
 
 ### Build maploom
 pushd vendor/maploom
-rm -fr node_modules
+rm -rf node_modules
 npm i npm@latest -g
+npm install -g grunt-cli
 npm install
 bower install --allow-root
 grunt
