@@ -143,6 +143,10 @@ pip install -r requirements.txt
 
 ### Build maploom
 pushd vendor/maploom
+if [[ -d node_modules ]];then
+  rm -rf node_modules
+fi
+sed -i "s/git:/https:/g" bower.json
 npm install
 bower install --allow-root
 grunt
@@ -160,27 +164,44 @@ sed '/body>/d' bin/index_body.html > bin/index_body_no_tag.html
 echo '{% load staticfiles i18n %}{% verbatim %}' > bin/_maploom_map.html
 cat bin/index_body_no_tag.html >> bin/_maploom_map.html
 echo '{% endverbatim %}' >> bin/_maploom_map.html
+# file checks
+if [[ ! -f bin/_maploom_js.html ]];then
+  echo 'Maploom is missing _maploom_js.html'
+  exit
+elif [[ ! -f bin/_maploom_map.html ]];then
+  echo 'Maploom is missing _maploom_map.html'
+  exit
+elif [[ ! -f bin/maploom.html ]];then
+  echo 'Maploom is missing maploom.html'
+  exit
+elif [[ ! -d bin/assets ]];then
+  echo 'Maploom is missing assets dir'
+  exit
+elif [[ ! -d bin/fonts ]];then
+  echo 'Maploom is missing fonts dir'
+  exit
+fi
+# templates
+if [[ -f ../../exchange/maploom/templates/maploom/_maploom_js.html ]];then
+  rm -f ../../exchange/maploom/templates/maploom/_maploom_js.html
+fi
+cp bin/_maploom_js.html ../../exchange/maploom/templates/maploom/_maploom_js.html
+if [[ -f ../../exchange/maploom/templates/maploom/_maploom_map.html ]];then
+  rm -f ../../exchange/maploom/templates/maploom/_maploom_map.html
+fi
+cp bin/_maploom_map.html ../../exchange/maploom/templates/maploom/_maploom_map.html
+if [[ -f ../../exchange/maploom/templates/maps/maploom.html ]];then
+  rm -f ../../exchange/maploom/templates/maps/maploom.html
+fi
+cp bin/maploom.html ../../exchange/maploom/templates/maps/maploom.html
+# static
+if [[ -d ../../exchange/maploom/static/maploom ]];then
+  rm -rf ../../exchange/maploom/static/maploom
+fi
+mkdir -p ../../exchange/maploom/static/maploom
+cp -r bin/assets ../../exchange/maploom/static/maploom/assets
+cp -r bin/fonts ../../exchange/maploom/static/maploom/fonts
 popd
-
-if [[ -f exchange/maploom/templates/maploom/_maploom_js.html ]];then
-  rm -f exchange/maploom/templates/maploom/_maploom_js.html
-fi
-if [[ -f exchange/maploom/templates/maploom/_maploom_map.html ]];then
-  rm -f exchange/maploom/templates/maploom/_maploom_map.html
-fi
-if [[ -f exchange/maploom/templates/maps/maploom.html ]];then
-  rm -f exchange/maploom/templates/maps/maploom.html
-fi
-if [[ -d exchange/maploom/static/maploom ]];then
-  rm -rf exchange/maploom/static/maploom
-fi
-
-mkdir exchange/maploom/static/maploom
-cp vendor/maploom/bin/_maploom_js.html exchange/maploom/templates/maploom/_maploom_js.html
-cp vendor/maploom/bin/_maploom_map.html exchange/maploom/templates/maploom/_maploom_map.html
-cp vendor/maploom/bin/maploom.html exchange/maploom/templates/maps/maploom.html
-cp -r vendor/maploom/bin/assets exchange/maploom/static/maploom/assets
-cp -r vendor/maploom/bin/fonts exchange/maploom/static/maploom/fonts
 ### end maploom build
 
 

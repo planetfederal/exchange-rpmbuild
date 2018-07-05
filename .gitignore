@@ -17,3 +17,6 @@ SRPMS
 
 #Vagrant Dev Setup
 .vagrant
+
+# Pycharm
+.idea
