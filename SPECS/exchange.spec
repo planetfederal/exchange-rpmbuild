@@ -147,8 +147,6 @@ if [[ -d node_modules ]];then
   rm -rf node_modules
 fi
 sed -i "s/git:/https:/g" bower.json
-# PR-190 hotfix for jshint, once merged to 1.4.x branch of exchange this can be removed
-sed -i 's/"grunt-contrib-jshint": "~0.4.3"/"grunt-contrib-jshint": "~1.1.0"/g' package.json
 npm install
 bower install --allow-root
 grunt
