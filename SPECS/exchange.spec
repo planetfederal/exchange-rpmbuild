@@ -130,8 +130,8 @@ pip install setuptools --upgrade
 
 # Install requirements from specific commit
 git clone git@github.com:boundlessgeo/ps-exchange.git
-cd ps-exchange
 mv ps-exchange exchange
+cd exchange
 git checkout tags/%{branch}
 if [[ $? -ne 0 ]];then
   git checkout %{branch}
