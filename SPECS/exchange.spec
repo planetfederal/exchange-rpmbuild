@@ -130,12 +130,10 @@ pip install setuptools --upgrade
 
 # Install requirements from specific commit
 git clone git@github.com:boundlessgeo/ps-exchange.git
-mv ps-exchange exchange
-cd exchange
-git checkout tags/%{branch}
-if [[ $? -ne 0 ]];then
-  git checkout %{branch}
-fi
+ 
+cd ps-exchange
+
+git checkout %{branch}
 
 git submodule update --init --recursive
 sed -i "s/-e //g" requirements.txt
