@@ -12,7 +12,7 @@ version="1.2.0"
 
 # Important - "Do not adjust, versions are determined by whitelist"
 lcms_ver="2.8"
-gdal_ver="2.1.2"
+gdal_ver="2.3.1"
 geos_ver="3.6.0"
 hdf5_ver="1.8.18"
 libkml_ver="1.3.0"
