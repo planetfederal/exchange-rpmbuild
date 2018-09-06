@@ -8,7 +8,7 @@
 # docker run -v $PWD:/build -it cloudfoundry/cflinuxfs2 /build/docker/build-vendor-libs.sh
 ###################
 
-version="1.2.0"
+version="1.3.0"
 
 # Important - "Do not adjust, versions are determined by whitelist"
 lcms_ver="2.8"
