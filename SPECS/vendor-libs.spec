@@ -18,7 +18,7 @@
 %endif
 
 Name: boundless-vendor-libs
-Version:        1.2.0
+Version:        1.2.1
 Release:        %{release}%{?dist}
 Summary:        Boundless vendor install containing Libraries and Headers
 URL:            https://boundlessgeo.com/
