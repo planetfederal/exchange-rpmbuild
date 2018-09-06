@@ -132,6 +132,8 @@ pip install setuptools --upgrade
 git clone git@github.com:boundlessgeo/ps-exchange.git
 mv ps-exchange exchange
 cd exchange
+pwd
+ls -lart
 git checkout tags/%{branch}
 if [[ $? -ne 0 ]];then
   git checkout %{branch}
