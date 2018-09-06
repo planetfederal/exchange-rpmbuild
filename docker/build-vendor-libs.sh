@@ -86,6 +86,11 @@ else
                  unzip \
                  wget \
                  xerces-c-devel
+  
+  # Installing devtoolset-3-toolchain in order to stage GCC 4.9x which is required by GDAL 2.3.1		
+  yum -y install centos-release-scl
+  yum -y --enablerepo=centos-sclo-rh-testing install devtoolset-3-toolchain
+  . /opt/rh/devtoolset-4/enable
 fi
 
 sandbox=/tmp/sandbox
