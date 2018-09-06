@@ -130,7 +130,8 @@ pip install setuptools --upgrade
 
 # Install requirements from specific commit
 git clone git@github.com:boundlessgeo/ps-exchange.git
-cd ps-exchange
+mv -T ps-exchange exchange
+cd exchange
 git checkout tags/%{branch}
 if [[ $? -ne 0 ]];then
   git checkout %{branch}
@@ -191,7 +192,7 @@ pushd $EXCHANGE_LIB
 SITEPACKAGES=.venv/lib/python2.7/site-packages
 mv $SITEPACKAGES/geonode_exchange-*.egg/exchange $SITEPACKAGES/
 mv exchange/docs $SITEPACKAGES/exchange
-rm -rf ps-exchange
+rm -rf exchange
 popd
 
 # setup supervisord configuration
