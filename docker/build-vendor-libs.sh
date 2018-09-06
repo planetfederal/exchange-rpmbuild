@@ -8,11 +8,11 @@
 # docker run -v $PWD:/build -it cloudfoundry/cflinuxfs2 /build/docker/build-vendor-libs.sh
 ###################
 
-version="1.2.0"
+version="1.2.1"
 
 # Important - "Do not adjust, versions are determined by whitelist"
 lcms_ver="2.8"
-gdal_ver="2.1.2"
+gdal_ver="2.3.1"
 geos_ver="3.6.0"
 hdf5_ver="1.8.18"
 libkml_ver="1.3.0"
@@ -222,7 +222,7 @@ if [ ! $release == 'cflinuxfs2' ]; then
 fi
 
 if [ ! -f gdal-$gdal_ver.tar.gz ]; then
-  wget https://s3.amazonaws.com/boundless-packaging/whitelisted/src/gdal-$gdal_ver.tar.gz
+  wget https://download.osgeo.org/gdal/2.3.1/gdal-$gdal_ver.tar.gz
 fi
 tar xf gdal-$gdal_ver.tar.gz
 cd gdal-$gdal_ver/
