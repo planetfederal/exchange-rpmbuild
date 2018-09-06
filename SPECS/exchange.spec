@@ -130,7 +130,7 @@ pip install setuptools --upgrade
 
 # Install requirements from specific commit
 git clone git@github.com:boundlessgeo/ps-exchange.git
-mv -T ps-exchange exchange
+mv ps-exchange exchange
 cd exchange
 git checkout tags/%{branch}
 if [[ $? -ne 0 ]];then
@@ -144,7 +144,7 @@ pip install -r requirements.txt
 
 ### Build maploom
 pushd vendor/maploom
-rm -fr node_modules
+sed -i "s/git:/https:/g" bower.json
 npm install
 bower install --allow-root
 grunt
