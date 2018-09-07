@@ -4,8 +4,6 @@
 # docker run -v $PWD:/build -it centos:7.3.1611 /build/docker/build-vendor-libs.sh
 # Build CentOS 6
 # docker run -v $PWD:/build -it centos:6.7 /build/docker/build-vendor-libs.sh
-# Build cflinuxfs2
-# docker run -v $PWD:/build -it cloudfoundry/cflinuxfs2 /build/docker/build-vendor-libs.sh
 ###################
 
 version="1.2.1"
@@ -33,72 +31,62 @@ echo "Release: $release"
 echo "CPU: $cpu"
 echo "-----------------"
 
-if [ $release == 'cflinuxfs2' ]; then
-  apt-get install -y doxygen \
-                     gfortran \
-                     libtool \
-                     libffi-dev \
-                     tk-dev
-else
-  yum -y install ant \
-                 autoconf \
-                 binutils \
-                 bison \
-                 bzip2 \
-                 bzip2-devel \
-                 chrpath \
-                 cmake \
-                 cppunit \
-                 curl-devel \
-                 db4-devel \
-                 expat-devel \
-                 flex \
-                 freetype-devel \
-                 gcc \
-                 gcc-c++ \
-                 gcc-gfortran \
-                 gdbm-devel \
-                 git \
-                 glibc-devel \
-                 java-1.8.0-openjdk-devel \
-                 krb5-devel \
-                 libcurl-devel \
-                 libgcj-devel \
-                 libjpeg-devel \
-                 libjpeg-turbo-devel \
-                 libpng-devel \
-                 libtiff-devel \
-                 libtool \
-                 libxml2-devel \
-                 libxslt-devel \
-                 make \
-                 ncurses-devel \
-                 openssl-devel \
-                 pam-devel \
-                 perl-devel \
-                 pkgconfig \
-                 poppler-devel \
-                 readline-devel \
-                 sqlite-devel \
-                 tar \
-                 tcl-devel \
-                 tk-devel \
-                 unzip \
-                 wget \
-                 xerces-c-devel
-  
-  # Installing devtoolset-3-toolchain in order to stage GCC 4.9x which is required by GDAL 2.3.1		
-  yum -y install centos-release-scl
-  yum -y --enablerepo=centos-sclo-rh-testing install devtoolset-3-toolchain
-  . /opt/rh/devtoolset-4/enable
-fi
+yum -y install ant \
+               autoconf \
+               binutils \
+               bison \
+               bzip2 \
+               bzip2-devel \
+               centos-release-scl \
+               chrpath \
+               cmake \
+               cppunit \
+               curl-devel \
+               db4-devel \
+               expat-devel \
+               flex \
+               freetype-devel \
+               gcc \
+               gcc-c++ \
+               gcc-gfortran \
+               gdbm-devel \
+               git \
+               glibc-devel \
+               krb5-devel \
+               libcurl-devel \
+               libgcj-devel \
+               libjpeg-devel \
+               libjpeg-turbo-devel \
+               libpng-devel \
+               libtiff-devel \
+               libtool \
+               libxml2-devel \
+               libxslt-devel \
+               make \
+               ncurses-devel \
+               openssl-devel \
+               pam-devel \
+               perl-devel \
+               pkgconfig \
+               poppler-devel \
+               readline-devel \
+               sqlite-devel \
+               tar \
+               tcl-devel \
+               tk-devel \
+               unzip \
+               wget \
+               xerces-c-devel
+
+# Installing devtoolset-3-toolchain in order to stage GCC 4.9x which is required by GDAL 2.3.1
+yum -y install wget && wget http://people.centos.org/tru/devtools-2/devtools-2.repo -O /etc/yum.repos.d/devtools-2.repo
+yum -y install devtoolset-2-toolchain
+. /opt/rh/devtoolset-2/enable
+yum -y --enablerepo=centos-sclo-rh-testing install devtoolset-4-toolchain
+. /opt/rh/devtoolset-4/enable
 
 sandbox=/tmp/sandbox
-if [ $release == 'cflinuxfs2' ]; then
-  vendor=/app/.heroku/vendor
-else
-  vendor=/opt/boundless/vendor
-fi
+vendor=/opt/boundless/vendor
 mkdir -p $vendor/{bin,lib,include,share} $sandbox
 
 if [[ $PATH != *$vendor* ]]; then
@@ -214,18 +202,6 @@ cd proj-$proj_ver/
 make install
 cd $sandbox
 
-if [ ! $release == 'cflinuxfs2' ]; then
-  if [ ! -f swig-$swig_ver.tar.gz ]; then
-    wget https://s3.amazonaws.com/boundless-packaging/whitelisted/src/swig-$swig_ver.tar.gz
-  fi
-  tar -xvf swig-$swig_ver.tar.gz
-  cd swig-$swig_ver
-  ./configure --prefix=$vendor
-  make
-  make install
-  cd $sandbox
-fi
-
 if [ ! -f gdal-$gdal_ver.tar.gz ]; then
   wget https://download.osgeo.org/gdal/2.3.1/gdal-$gdal_ver.tar.gz
 fi
@@ -251,15 +227,6 @@ cd gdal-$gdal_ver/
     --enable-shared
 make
 make install
-
-cd swig/java
-if [ ! $release == 'cflinuxfs2' ]; then
-  sed -i "s|SWIG = swig|SWIG = /opt/boundless/vendor/bin/swig|" ../SWIGmake.base
-  sed -i '1iJAVA_HOME=/usr/lib/jvm/java-openjdk' java.opt
-  make
-  make install
-  cd $sandbox
-fi
 
 rm -fr $vendor/include/boost
 find $vendor/lib -type f -name '*.a' -exec rm -f {} +

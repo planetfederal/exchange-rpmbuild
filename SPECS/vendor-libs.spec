@@ -3,7 +3,7 @@
 %define debug_package %{nil}
 %define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
 %define __url https://s3.amazonaws.com/boundless-packaging/whitelisted/vendor/vendor-%{version}-%{__dist}-%{_arch}.tar.gz
-%define _release 3
+%define _release 1
 
 %if %{?rel:1}0
 %define release %{rel}
