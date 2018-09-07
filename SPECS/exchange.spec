@@ -127,6 +127,7 @@ source .venv/bin/activate
 python -m pip --version
 python -m pip install pip==9.0.3 --upgrade
 pip install setuptools --upgrade
+pip install https://s3.amazonaws.com/pyb7s-simple-repo/gdal/GDAL-2.3.1-cp27-cp27mu-manylinux1_x86_64.whl
 
 # Install requirements from specific commit
 git clone git@github.com:boundlessgeo/ps-exchange.git exchange
