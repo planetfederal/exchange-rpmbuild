@@ -130,7 +130,7 @@ pip install setuptools --upgrade
 pip install https://s3.amazonaws.com/pyb7s-simple-repo/gdal/GDAL-2.3.1-cp27-cp27mu-manylinux1_x86_64.whl
 
 # Install requirements from specific commit
-git clone git@github.com:boundlessgeo/ps-exchange.git exchange
+git clone git@github.com:boundlessgeo/exchange.git
 cd exchange
 pwd
 ls -lart
@@ -138,6 +138,10 @@ git checkout tags/%{branch}
 if [[ $? -ne 0 ]];then
   git checkout %{branch}
 fi
+
+git rm --cached vendor/docker && git rm --cached vendor/exchange-mobile-extension
+rm -rf vendor/docker
+rm -rf vendor/exchange-mobile-extension
 
 git submodule update --init --recursive
 sed -i "s/-e //g" requirements.txt
