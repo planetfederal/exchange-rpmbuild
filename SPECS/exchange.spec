@@ -136,7 +136,7 @@ cd ps-exchange
 git checkout %{branch}
 
 git submodule sync
-git submodule update --init --recursive
+git submodule update --init --remote --recursive
 sed -i "s/-e //g" requirements.txt
 pip install -r requirements.txt
 
