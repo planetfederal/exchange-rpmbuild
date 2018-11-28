@@ -144,7 +144,7 @@ pip install -r requirements.txt
 npm cache clean -f
 npm install -g n
 n stable
-
+npm install -g node-gyp
 ###############
 #build SDK
 ###############
