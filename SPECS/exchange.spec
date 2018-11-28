@@ -129,7 +129,7 @@ python -m pip install pip==9.0.3 --upgrade
 pip install setuptools --upgrade
 
 # Install requirements from specific commit
-git clone git@github.com:boundlessgeo/exchange.git
+git clone git@github.com:boundlessgeo/ps-exchange.git exchange
 cd exchange
 git checkout tags/%{branch}
 if [[ $? -ne 0 ]];then
