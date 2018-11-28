@@ -177,6 +177,8 @@ yarn webpack-build
 # then copy the built bundle into the exchange repo (check the directories here, they might be different for you, i ran this from the root of the exchange repo)
 cp ../era-sdk/dist/bundle.js $cwd/exchange/static/js/era/bundle.js
 
+cd $cwd
+
 ### Build maploom
 pushd vendor/maploom
 if [[ -d node_modules ]];then
