@@ -141,6 +141,9 @@ git submodule update --init --recursive
 sed -i "s/-e //g" requirements.txt
 pip install -r requirements.txt
 
+npm cache clean -f
+npm install -g n
+n stable
 
 ###############
 #build SDK
