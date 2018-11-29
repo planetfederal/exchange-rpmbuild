@@ -131,7 +131,7 @@ pip install setuptools --upgrade
 # Install requirements from specific commit
 git clone git@github.com:boundlessgeo/ps-exchange.git exchange
 cd exchange
-cwd=$(pwd)
+
 git checkout tags/%{branch}
 if [[ $? -ne 0 ]];then
   git checkout %{branch}
@@ -141,46 +141,6 @@ git submodule update --init --recursive
 sed -i "s/-e //g" requirements.txt
 pip install -r requirements.txt
 
-npm cache clean -f
-npm install -g n
-n stable
-npm install -g node-gyp
-###############
-#build SDK
-###############
-
-cd $cwd
-cd ..
-# basically the flow is
-# clone the sdk repo, blah blah, you know
-git clone git@github.com:j-meyer/sdk.git
-cd sdk/
-git checkout feature/era
-npm install
-# there will probably be issues with running the install, god speed, i may be able to help _some_
-
-# build the sdk lib repo
-npm run dist
-
-# link the built sdk lib so the era app can use that instead of the one from npm
-cd dist/
-npm link
-
-# from the era sdk app
-git clone git@github.com:boundlessgeo/era-sdk.git
-cd era-sdk
-yarn install
-
-# link to the build sdk lib
-npm link @boundlessgeo/sdk
-
-# build the project
-yarn webpack-build
-
-# then copy the built bundle into the exchange repo (check the directories here, they might be different for you, i ran this from the root of the exchange repo)
-cp ../era-sdk/dist/bundle.js $cwd/exchange/static/js/era/bundle.js
-
-cd $cwd
 
 ### Build maploom
 pushd vendor/maploom
